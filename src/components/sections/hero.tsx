@@ -129,20 +129,24 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
+              className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto"
             >
               <a
                 href="#contact"
-                className="inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-500 transition-all hover:-translate-y-1 group shadow-[0_0_20px_rgba(37,99,235,0.3)]"
+                className="group relative inline-flex items-center justify-center px-8 py-4 font-mono text-sm font-bold text-primary bg-[#050505] border border-primary/40 rounded-lg overflow-hidden transition-all hover:bg-primary/5 hover:border-primary hover:shadow-[0_0_25px_rgba(var(--primary),0.3)] hover:-translate-y-1"
               >
-                Let's Talk
-                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={16} />
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out" />
+                <span className="mr-3 text-pink-500 font-black text-base">{">"}</span>
+                <span className="tracking-wider text-base">Let's Talk</span>
+                <span className="ml-2 w-2.5 h-5 bg-primary animate-pulse opacity-80 group-hover:opacity-100 transition-opacity duration-300"></span>
               </a>
+              
               <a
                 href="#projects"
-                className="inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-foreground bg-surface border border-border rounded-lg hover:bg-muted transition-all hover:-translate-y-1 glass"
+                className="group relative inline-flex items-center justify-center px-8 py-4 font-mono text-sm font-medium text-slate-300 bg-surface/50 border border-border rounded-lg transition-all hover:bg-white/5 hover:border-white/20 hover:text-white hover:-translate-y-1 backdrop-blur-sm shadow-xl"
               >
-                Explore Work
+                <span className="mr-3 text-emerald-400 font-bold text-base">~/</span>
+                <span className="tracking-wide text-base">Explore Work</span>
               </a>
             </motion.div>
           </div>

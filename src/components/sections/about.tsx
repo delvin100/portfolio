@@ -13,8 +13,8 @@ export function AboutSection() {
         <SectionHeader 
           title="About Me" 
           subtitle={
-            <span className="font-handwriting text-3xl text-primary/80 rotate-[-2deg] inline-block mt-2">
-              building stuff so I don't have to touch grass.
+            <span className="font-handwriting text-2xl md:text-3xl text-primary/80 rotate-[-1deg] inline-block mt-2 tracking-wide">
+              "As long as I live, there are infinite chances." <span className="text-xl">— Monkey D. Luffy</span>
             </span>
           } 
         />
@@ -107,6 +107,7 @@ export function AboutSection() {
                   src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=800&auto=format&fit=crop" 
                   alt="Delvin Varghese" 
                   fill 
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-110" 
                 />
               </div>
@@ -114,8 +115,9 @@ export function AboutSection() {
             </div>
             
             {/* Skewed Badge */}
-            <div className="absolute -bottom-6 right-0 bg-white border-2 border-slate-800 px-4 py-2 font-mono text-xs font-bold text-slate-800 uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] rotate-[-4deg] z-20">
-              WILL OF D(EVELOPER) ☠️
+            <div className="absolute -bottom-6 right-0 bg-white border-2 border-slate-800 px-4 py-2 font-mono text-xs font-bold text-slate-800 uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] rotate-[-4deg] z-20 flex items-center gap-2">
+              WILL OF D(EVELOPER)
+              <Image src="/Straw-Hat-Logo-removebg-preview.png" alt="Straw Hat Logo" width={32} height={32} className="object-contain inline-block drop-shadow-sm" />
             </div>
           </motion.div>
         </div>
