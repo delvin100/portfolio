@@ -63,7 +63,7 @@ export default async function AdminSkillsPage() {
         </Card>
       ) : (
         <div className="space-y-8">
-          {Object.entries(skillsByCategory).map(([category, categorySkills]) => (
+          {Object.entries(skillsByCategory).map(([category, categorySkills]: [string, any[]]) => (
             <Card key={category}>
               <CardHeader className="bg-secondary/5 border-b border-border/50 pb-4">
                 <CardTitle className="text-xl flex items-center justify-between">
