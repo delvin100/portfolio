@@ -119,9 +119,9 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-xl md:text-2xl text-slate-400 max-w-xl mb-10 leading-relaxed font-normal"
+              className="text-xl md:text-2xl text-slate-400 max-w-xl mb-10 leading-relaxed font-light"
             >
-              A full-stack website developer with a passion for crafting unique digital experiences.
+              A <span className="inline-block px-3 py-0.5 mx-1 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 rounded-lg text-blue-200 font-medium text-lg md:text-xl shadow-sm backdrop-blur-sm">full-stack</span> website developer with a passion for crafting <span className="font-serif italic text-white tracking-wide text-2xl md:text-3xl px-1">unique</span> digital experiences.
             </motion.p>
             
             {/* Buttons */}

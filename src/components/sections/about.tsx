@@ -117,7 +117,7 @@ export function AboutSection() {
             {/* Skewed Badge */}
             <div className="absolute -bottom-6 right-0 bg-white border-2 border-slate-800 px-4 py-2 font-mono text-xs font-bold text-slate-800 uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] rotate-[-4deg] z-20 flex items-center gap-2">
               WILL OF D(EVELOPER)
-              <Image src="/Straw-Hat-Logo-removebg-preview.png" alt="Straw Hat Logo" width={32} height={32} className="object-contain inline-block drop-shadow-sm" />
+              <Image src="/Straw-Hat-Logo-removebg-preview.png" alt="Straw Hat Logo" width={32} height={32} className="object-contain inline-block drop-shadow-sm w-auto h-auto" />
             </div>
           </motion.div>
         </div>

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { SectionHeader } from "../ui/section-header"
 import { 
@@ -45,38 +46,27 @@ function groupSkills(skills: SkillCategory[]) {
 
 
 
-const DinoAnimation = ({ cardCount }: { cardCount: number }) => {
-  if (cardCount === 0) return null;
+const DinoAnimation = ({ posIndex, direction, columns }: { posIndex: number, direction: number, columns: number }) => {
+  if (columns === 0) return null;
 
-  // Max 4 cards on a single row (since grid-cols-4)
-  const columns = Math.min(cardCount, 4);
-  
-  // Each column is 25%. We want it to travel up to the end of the existing cards.
-  const endLeft = `${(columns * 25)}%`;
-  const totalDuration = columns * 2;
+  // The CSS grid is always lg:grid-cols-4 when the dino is visible, so we divide by 4.
+  const gridCols = 4;
+  const leftPos = `calc(${(posIndex / gridCols) * 100}% + ${(100 / gridCols) / 2}% - 32px)`;
 
   return (
     <div className="absolute -top-14 left-0 w-full h-16 pointer-events-none hidden lg:block z-20">
-      {/* The Running Dino */}
       <motion.div
         className="absolute bottom-0 text-[2.5rem] leading-none z-10 text-slate-200"
-        animate={{ 
-          left: ["-5%", endLeft],
-          opacity: [0, 1, 1, 1, 0] 
-        }}
-        transition={{ 
-          duration: totalDuration, 
-          ease: "linear", 
-          repeat: Infinity,
-          times: [0, 0.05, 0.5, 0.95, 1]
-        }}
+        animate={{ left: leftPos }}
+        transition={{ duration: 0.6, ease: "linear" }}
       >
         <motion.div
-          animate={{ y: [0, -45, 0] }}
+          key={posIndex} // Force re-animation on position change
+          initial={{ y: 0, scaleX: direction }}
+          animate={{ y: [0, -45, 0], scaleX: direction }}
           transition={{
-            duration: 2, // 2s per jump
-            ease: ["easeOut", "easeIn"],
-            repeat: Infinity,
+            y: { duration: 0.6, ease: ["easeOut", "easeIn"] },
+            scaleX: { duration: 0.1 }
           }}
         >
           <Image src="/download-removebg-preview.png" alt="Running Dino" width={64} height={64} className="w-16 h-16 object-contain invert opacity-90" />
@@ -88,6 +78,57 @@ const DinoAnimation = ({ cardCount }: { cardCount: number }) => {
 
 export function SkillsSection({ skills }: { skills: SkillCategory[] }) {
   const skillCategories = groupSkills(skills)
+  const cardCount = skillCategories.length
+  const columns = Math.min(cardCount, 4)
+
+  const [dinoPos, setDinoPos] = useState(0)
+  const [dinoDirection, setDinoDirection] = useState<1 | -1>(1)
+  const [landedIndex, setLandedIndex] = useState(-1) // -1 means in the air or starting
+
+  useEffect(() => {
+    if (columns <= 1) return;
+    
+    let currentPos = 0;
+    let direction = 1;
+    
+    // Initial landing effect for the first card after the first jump in place
+    const initialTimer = setTimeout(() => {
+      if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+        setLandedIndex(0);
+      }
+    }, 600);
+    
+    const interval = setInterval(() => {
+      if (typeof window !== 'undefined' && window.innerWidth < 1024) return;
+      
+      // Calculate next position
+      if (direction === 1 && currentPos >= columns - 1) {
+        direction = -1;
+      } else if (direction === -1 && currentPos <= 0) {
+        direction = 1;
+      }
+      
+      currentPos += direction;
+      
+      setDinoDirection(direction as 1 | -1);
+      setDinoPos(currentPos);
+      
+      // Clear the landed index during jump
+      setLandedIndex(-1);
+      
+      // Set landed index after jump completes
+      setTimeout(() => {
+        setLandedIndex(currentPos);
+      }, 600);
+      
+    }, 1500); // Jump every 1.5 seconds
+    
+    return () => {
+      clearInterval(interval);
+      clearTimeout(initialTimer);
+    };
+  }, [columns]);
+
   return (
     <section id="skills" className="py-24 relative z-10">
       <div className="container mx-auto px-6 md:px-12">
@@ -105,7 +146,7 @@ export function SkillsSection({ skills }: { skills: SkillCategory[] }) {
         />
         
         <div className="relative mt-20">
-          <DinoAnimation cardCount={skillCategories.length} />
+          <DinoAnimation posIndex={dinoPos} direction={dinoDirection} columns={columns} />
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {skillCategories.map((category, index) => (
@@ -123,7 +164,19 @@ export function SkillsSection({ skills }: { skills: SkillCategory[] }) {
               {/* Inner glowing shadow */}
               <div className="absolute -inset-[1px] bg-gradient-to-r from-blue-500/0 via-indigo-500/10 to-blue-500/0 rounded-3xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-700" />
               
-              <div className="relative h-full bg-surface/50 backdrop-blur-xl border border-border/50 rounded-3xl p-8 hover:bg-surface/80 transition-colors duration-500 flex flex-col z-10 overflow-hidden shadow-2xl">
+              {/* Dino Landed Flash Effect */}
+              <motion.div 
+                animate={landedIndex === index ? { opacity: [0, 0.4, 0] } : { opacity: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="absolute inset-0 bg-primary/20 rounded-3xl blur-xl z-0 pointer-events-none hidden lg:block" 
+              />
+              
+              {/* Card Content with Press Animation */}
+              <motion.div 
+                animate={landedIndex === index ? { y: [0, 6, 0], scale: [1, 0.98, 1] } : { y: 0, scale: 1 }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+                className="relative h-full bg-surface/50 backdrop-blur-xl border border-border/50 rounded-3xl p-8 hover:bg-surface/80 transition-colors duration-500 flex flex-col z-10 overflow-hidden shadow-2xl"
+              >
                 
                 <div className="relative z-10 flex flex-col h-full">
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-8 border border-primary/10 shadow-[0_0_15px_rgba(var(--primary),0.1)] group-hover:shadow-[0_0_25px_rgba(var(--primary),0.2)] transition-shadow">
@@ -147,7 +200,7 @@ export function SkillsSection({ skills }: { skills: SkillCategory[] }) {
                     ))}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
           ))}
           </div>

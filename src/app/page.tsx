@@ -8,6 +8,8 @@ import { ProjectsSection } from "@/components/sections/projects"
 import { ExperienceSection } from "@/components/sections/experience"
 import { ContactSection } from "@/components/sections/contact"
 
+export const revalidate = 60; // Cache this page for 1 minute (60 seconds)
+
 export default async function Home() {
   const supabase = await createClient()
 
