@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { SubmitButton } from '@/components/admin/submit-button'
 import { Input } from '@/components/ui/input'
 import { createSkill } from '@/app/actions/portfolio'
 import Link from 'next/link'
@@ -76,10 +77,7 @@ export default async function NewSkillPage() {
             </div>
 
             <div className="pt-6 flex justify-end">
-              <Button type="submit" size="lg" className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-500 hover:to-emerald-500 text-white shadow-lg hover:shadow-blue-500/25 transition-all w-full sm:w-auto text-md font-semibold">
-                Launch Skill
-                <Sparkles className="ml-2 h-4 w-4" />
-              </Button>
+              <SubmitButton label="Launch Skill" successMessage="Skill added successfully" />
             </div>
           </form>
           <AutoFillScript categoryIconMap={categoryIconMap} />

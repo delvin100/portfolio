@@ -20,7 +20,7 @@ export default async function Home() {
     { data: experiences }
   ] = await Promise.all([
     supabase.from('projects').select('*').order('order_index', { ascending: true }),
-    supabase.from('skills').select('*').order('name', { ascending: true }),
+    supabase.from('skills').select('*').order('order_index', { ascending: true }),
     supabase.from('experience').select('*').order('start_date', { ascending: false, nullsFirst: false })
   ])
 

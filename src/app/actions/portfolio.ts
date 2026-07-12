@@ -72,7 +72,8 @@ export async function createSkill(formData: FormData) {
   const data = {
     name: formData.get('name') as string,
     category: formData.get('category') as string,
-    icon: formData.get('icon') as string
+    icon: formData.get('icon') as string,
+    order_index: Number(formData.get('order_index') || 0)
   }
 
   const { error } = await supabase.from('skills').insert([data])
@@ -88,7 +89,7 @@ export async function updateSkill(id: string, formData: FormData) {
   const data = {
     name: formData.get('name') as string,
     category: formData.get('category') as string,
-    icon: formData.get('icon') as string
+    icon: formData.get('icon') as string,
   }
 
   const { error } = await supabase.from('skills').update(data).eq('id', id)
@@ -102,6 +103,22 @@ export async function deleteSkill(id: string) {
   const supabase = await createClient()
   const { error } = await supabase.from('skills').delete().eq('id', id)
   if (error) throw new Error(error.message)
+  revalidatePath('/', 'layout')
+}
+
+export async function updateSkillsOrder(updates: { id: string, order_index: number }[]) {
+  const supabase = await createClient()
+  
+  // Supabase doesn't have a built-in bulk update for different values yet in the standard client,
+  // so we'll do this as a Promise.all of individual updates for small datasets like skills.
+  const promises = updates.map(update => 
+    supabase.from('skills').update({ order_index: update.order_index }).eq('id', update.id)
+  )
+  
+  const results = await Promise.all(promises)
+  const error = results.find(r => r.error)?.error
+  if (error) throw new Error(error.message)
+  
   revalidatePath('/', 'layout')
 }
 
