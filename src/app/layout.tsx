@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { LoadingScreen } from "@/components/loading-screen";
 import { cn } from "@/lib/utils";
+import { Toaster } from "sonner";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -44,6 +45,7 @@ export default function RootLayout({
             </main>
             <ScrollToTop />
           </div>
+          <Toaster position="bottom-right" theme="dark" richColors />
         </ThemeProvider>
       </body>
     </html>
