@@ -51,17 +51,22 @@ export default async function NewSkillPage() {
                 <FolderTree className="h-4 w-4 text-emerald-400" />
                 Category
               </label>
-              <select 
-                id="category_id" 
-                name="category_id" 
-                required 
-                className="flex h-12 w-full rounded-md bg-background/50 border border-white/10 px-3 py-2 text-lg ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
-              >
-                <option value="">Select a category...</option>
-                {categories?.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
+              <div className="relative">
+                <select 
+                  id="category_id" 
+                  name="category_id" 
+                  required 
+                  className="appearance-none flex h-12 w-full rounded-md bg-background/50 border border-white/10 px-4 py-2 pr-12 text-lg ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 disabled:cursor-not-allowed disabled:opacity-50 transition-all cursor-pointer text-slate-100"
+                >
+                  <option value="" className="bg-slate-900 text-slate-100">Select a category...</option>
+                  {categories?.map((cat) => (
+                    <option key={cat.id} value={cat.id} className="bg-slate-900 text-slate-100">{cat.name}</option>
+                  ))}
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+              </div>
             </div>
 
             <IconSelector />

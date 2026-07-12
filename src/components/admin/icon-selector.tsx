@@ -8,6 +8,8 @@ import { Image as ImageIcon, Link as LinkIcon, Type } from 'lucide-react'
 
 export function IconSelector({ defaultType = 'lucide', defaultValue = '' }: { defaultType?: string, defaultValue?: string }) {
   const [iconType, setIconType] = useState(defaultType)
+  const [lucideValue, setLucideValue] = useState(defaultType === 'lucide' ? defaultValue : '')
+  const [urlValue, setUrlValue] = useState(defaultType === 'url' ? defaultValue : '')
 
   return (
     <div className="space-y-4">
@@ -47,10 +49,11 @@ export function IconSelector({ defaultType = 'lucide', defaultValue = '' }: { de
           <div className="space-y-2">
             <Input 
               name="icon_value" 
-              defaultValue={iconType === 'lucide' ? defaultValue : ''} 
+              value={lucideValue}
+              onChange={(e) => setLucideValue(e.target.value)}
               placeholder="e.g. Terminal, Database" 
               className="bg-background/50 border-white/10"
-              required 
+              required={iconType === 'lucide'}
             />
             <p className="text-xs text-muted-foreground">Type a Lucide icon name (e.g., Code2, Layout)</p>
           </div>
@@ -61,10 +64,11 @@ export function IconSelector({ defaultType = 'lucide', defaultValue = '' }: { de
             <Input 
               name="icon_value" 
               type="url"
-              defaultValue={iconType === 'url' ? defaultValue : ''} 
+              value={urlValue}
+              onChange={(e) => setUrlValue(e.target.value)}
               placeholder="https://example.com/icon.svg" 
               className="bg-background/50 border-white/10"
-              required 
+              required={iconType === 'url'}
             />
             <p className="text-xs text-muted-foreground">Provide a direct link to an image (SVG, PNG, etc.)</p>
           </div>
@@ -72,11 +76,11 @@ export function IconSelector({ defaultType = 'lucide', defaultValue = '' }: { de
 
         {iconType === 'upload' && (
           <div className="space-y-2">
-            <Input 
+            <input 
               name="icon_file" 
               type="file" 
               accept="image/*"
-              className="bg-background/50 border-white/10 h-auto p-0 cursor-pointer overflow-hidden file:border-0 file:border-r file:border-white/10 file:bg-blue-500/10 file:text-blue-400 file:px-4 file:py-3 file:mr-4 file:font-medium file:cursor-pointer file:hover:bg-blue-500/20 transition-all text-muted-foreground"
+              className="flex w-full rounded-md bg-background/50 border border-white/10 text-sm text-slate-300 overflow-hidden cursor-pointer file:cursor-pointer file:border-0 file:border-r file:border-white/10 file:bg-blue-500/10 file:px-4 file:py-2.5 file:mr-4 file:text-blue-400 file:font-medium hover:file:bg-blue-500/20 file:transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
               required={!defaultValue || defaultType !== 'upload'}
             />
             <Input type="hidden" name="icon_value" value={defaultValue} />

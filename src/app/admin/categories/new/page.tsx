@@ -18,7 +18,7 @@ export default function NewCategoryPage() {
           <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">Add Category</h1>
           <p className="text-muted-foreground mt-2">Create a new group for your skills.</p>
         </div>
-        <Link href="/admin/categories">
+        <Link href="/admin/skills">
           <Button variant="outline" className="border-white/10 hover:bg-white/5">Cancel</Button>
         </Link>
       </div>

@@ -16,6 +16,10 @@ export function ToastNotifier() {
         toast.success("Skill added successfully")
       } else if (success === "skill_updated") {
         toast.success("Skill updated successfully")
+      } else if (success === "category_added") {
+        toast.success("Category added successfully")
+      } else if (success === "category_updated") {
+        toast.success("Category updated successfully")
       }
 
       // Remove the query param from the URL so it doesn't fire again on refresh

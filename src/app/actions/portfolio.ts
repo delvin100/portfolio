@@ -126,8 +126,15 @@ export async function updateCategory(id: string, formData: FormData) {
 
 export async function deleteCategory(id: string) {
   const supabase = await createClient()
+  
+  // Delete all skills in this category first
+  const { error: skillsError } = await supabase.from('skills').delete().eq('category_id', id)
+  if (skillsError) throw new Error(skillsError.message)
+  
+  // Delete the category itself
   const { error } = await supabase.from('skill_categories').delete().eq('id', id)
   if (error) throw new Error(error.message)
+  
   revalidatePath('/', 'layout')
 }
 

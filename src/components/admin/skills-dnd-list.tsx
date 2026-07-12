@@ -218,7 +218,7 @@ function CategoryItem({
                         Delete Category
                       </DialogTitle>
                       <DialogDescription className="text-slate-400 text-base leading-relaxed pt-2">
-                        Are you sure you want to delete <strong className="text-white font-semibold">{category.name}</strong>? This action cannot be undone. Any skills within this category will become Uncategorized.
+                        Are you sure you want to delete <strong className="text-white font-semibold">{category.name}</strong>? This action cannot be undone. Any skills within this category will be deleted.
                       </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="sm:justify-end gap-3 pt-6 border-t border-[#1e293b]/50 mt-2 bg-transparent">
