@@ -94,18 +94,23 @@ function SkillItem({ skill }: { skill: Skill }) {
           <DialogTrigger className="cursor-pointer">
             <Trash2 className="h-4 w-4 text-red-500 hover:text-red-400 transition-colors cursor-pointer" />
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md bg-[#0b1120] border-[#1e293b]">
-            <DialogHeader>
-              <DialogTitle className="text-slate-100">Delete Skill</DialogTitle>
-              <DialogDescription className="text-slate-400">
-                Are you sure you want to delete <strong className="text-slate-200">{skill.name}</strong>? This action cannot be undone.
+          <DialogContent className="sm:max-w-md bg-[#0b1120] border-[#1e293b] shadow-2xl p-6">
+            <DialogHeader className="gap-3">
+              <DialogTitle className="text-xl flex items-center gap-2 text-slate-100">
+                <div className="p-2 bg-red-500/10 rounded-full">
+                  <Trash2 className="h-5 w-5 text-red-500" />
+                </div>
+                Delete Skill
+              </DialogTitle>
+              <DialogDescription className="text-slate-400 text-base leading-relaxed pt-2">
+                Are you sure you want to delete <strong className="text-white font-semibold">{skill.name}</strong>? This action cannot be undone.
               </DialogDescription>
             </DialogHeader>
-            <DialogFooter className="sm:justify-end gap-2 mt-4 bg-transparent border-t-0 p-0">
+            <DialogFooter className="sm:justify-end gap-3 pt-6 border-t border-[#1e293b]/50 mt-2">
               <Button
                 type="button"
                 variant="outline"
-                className="border-[#1e293b] text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+                className="border-white/10 bg-transparent text-slate-300 hover:bg-white/5 hover:text-white"
                 onClick={() => setIsOpen(false)}
                 disabled={isDeleting}
               >
@@ -114,7 +119,7 @@ function SkillItem({ skill }: { skill: Skill }) {
               <Button
                 type="button"
                 variant="destructive"
-                className="bg-red-600 hover:bg-red-700 text-white"
+                className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white shadow-lg hover:shadow-red-500/25 transition-all"
                 onClick={handleDelete}
                 disabled={isDeleting}
               >

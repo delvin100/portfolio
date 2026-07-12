@@ -47,7 +47,14 @@ export default function RootLayout({
             </main>
             <ScrollToTop />
           </div>
-          <Toaster position="top-center" theme="dark" richColors />
+          <Toaster 
+            position="top-center" 
+            theme="dark" 
+            richColors 
+            toastOptions={{
+              style: { width: 'max-content', minWidth: 'max-content' }
+            }}
+          />
           <Suspense fallback={null}>
             <ToastNotifier />
           </Suspense>
