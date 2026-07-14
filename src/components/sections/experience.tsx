@@ -23,7 +23,18 @@ export function ExperienceSection({ experiences }: { experiences: Experience[] }
   return (
     <section id="experience" className="py-24 relative z-10">
       <div className="container mx-auto px-6 md:px-12 max-w-5xl">
-        <SectionHeader title="Experience" subtitle="My professional journey." />
+        <SectionHeader 
+          title="Experience" 
+          centered
+          subtitle={
+            <span 
+              className="inline-block mt-4 text-xl md:text-2xl text-blue-400/90 -rotate-2 drop-shadow-md tracking-wide"
+              style={{ fontFamily: 'var(--font-caveat), cursive' }}
+            >
+              where I've been leveling up irl.
+            </span>
+          } 
+        />
         
         <div className="mt-16 relative">
           {/* Timeline vertical line */}

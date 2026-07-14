@@ -1,12 +1,17 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Download, Paperclip, Terminal } from "lucide-react"
+import { Eye, Paperclip, Terminal } from "lucide-react"
 import { SectionHeader } from "../ui/section-header"
 
 import Image from "next/image"
 
-export function AboutSection() {
+interface AboutSectionProps {
+  profilePictureUrl?: string;
+  resumeUrl?: string;
+}
+
+export function AboutSection({ profilePictureUrl, resumeUrl }: AboutSectionProps) {
   return (
     <section id="about" className="py-24 relative z-10">
       <div className="container mx-auto px-6 md:px-12">
@@ -48,25 +53,25 @@ export function AboutSection() {
                 <p>
                   <span className="text-pink-400 font-bold">#</span> <span className="text-cyan-300 font-bold text-base tracking-wide">Introduction</span><br/>
                   <span className="inline-block mt-2 text-slate-400">
-                    I'm a full stack developer passionate about building fast, scalable, and beautiful web applications. Carrying the "Will of D" — where D stands for Developer — I'm on a journey to conquer the digital Grand Line.
+                    I'm a Full Stack Developer specializing in building fast, scalable, and user-focused web applications. I enjoy transforming ideas into production-ready software using modern technologies like React, Next.js, Node.js, Express, MongoDB, PostgreSQL, and TypeScript. I'm passionate about writing clean, maintainable code and continuously improving both developer and user experiences.
                   </span>
                 </p>
                 <p>
                   <span className="text-pink-400 font-bold">##</span> <span className="text-yellow-300 font-semibold tracking-wide">What I Do</span><br/>
                   <span className="inline-block mt-2 text-slate-400">
-                    I handle the entire development process—from designing complex databases and secure APIs on the backend, to crafting pixel-perfect, interactive React interfaces on the frontend. I believe that writing clean, maintainable code is just as important as the end-user experience.
+                    I design and build complete web applications—from architecting databases and developing secure REST APIs to creating responsive, accessible, and interactive user interfaces. My focus is on delivering applications that are performant, scalable, and easy to maintain.
                   </span>
                 </p>
                 <p>
                   <span className="text-pink-400 font-bold">##</span> <span className="text-yellow-300 font-semibold tracking-wide">My Philosophy</span><br/>
                   <span className="inline-block mt-2 text-slate-400">
-                    Beyond just writing code, I love solving hard architectural problems and bridging the gap between design and engineering. Whether it's optimizing slow database queries or fine-tuning CSS animations, I'm driven by the details.
+                    I enjoy solving challenging engineering problems, whether it's designing scalable backend systems, optimizing database performance, or refining frontend interactions. I believe exceptional software comes from balancing clean architecture, performance, maintainability, and thoughtful user experience.
                   </span>
                 </p>
                 <p>
                   <span className="text-pink-400 font-bold">##</span> <span className="text-yellow-300 font-semibold tracking-wide">Current Focus</span><br/>
                   <span className="inline-block mt-2 text-slate-400">
-                    Right now, I'm especially focused on exploring real-time features, modern web architectures, and pushing the boundaries of what's possible in human-centered digital products.
+                    I'm currently expanding my expertise in real-time applications and WebSockets, modern React & Next.js architecture, performance optimization, scalable backend systems, and AI-powered web applications and intelligent user experiences.
                   </span>
                 </p>
               </div>
@@ -74,12 +79,13 @@ export function AboutSection() {
             
             <div className="pt-8">
               <a
-                href="/resume.pdf"
+                href={resumeUrl || "/resume.pdf"}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-foreground bg-surface border border-border rounded-full hover:bg-muted transition-all hover:scale-105 active:scale-95 interactive glass"
               >
-                <Download className="mr-2" size={16} />
-                Download Resume
+                <Eye className="mr-2" size={16} />
+                View Resume
               </a>
             </div>
           </motion.div>
@@ -104,7 +110,7 @@ export function AboutSection() {
             <div className="bg-white p-4 pb-12 shadow-2xl relative rounded-sm">
               <div className="aspect-[4/5] relative bg-slate-200 overflow-hidden rounded-sm border border-slate-100">
                 <Image 
-                  src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=800&auto=format&fit=crop" 
+                  src={profilePictureUrl || "/profile.jpg"}
                   alt="Delvin Varghese" 
                   fill 
                   sizes="(max-width: 768px) 100vw, 50vw"

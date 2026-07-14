@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Briefcase, Code, FileText, Award, LogOut } from 'lucide-react'
+import { LayoutDashboard, Briefcase, Code, FileText, Award, LogOut, Settings } from 'lucide-react'
 import { logout } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 
@@ -12,6 +12,7 @@ const navItems = [
   { href: '/admin/skills', label: 'Skills', icon: Code },
   { href: '/admin/experience', label: 'Experience', icon: FileText },
   { href: '/admin/certifications', label: 'Certifications', icon: Award },
+  { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

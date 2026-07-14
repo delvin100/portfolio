@@ -18,19 +18,26 @@ export default async function Home() {
     { data: projects },
     { data: skills },
     { data: categories },
-    { data: experiences }
+    { data: experiences },
+    { data: settingsData }
   ] = await Promise.all([
     supabase.from('projects').select('*').order('order_index', { ascending: true }),
     supabase.from('skills').select('*').order('order_index', { ascending: true }),
     supabase.from('skill_categories').select('*').order('order_index', { ascending: true }),
-    supabase.from('experience').select('*').order('start_date', { ascending: false, nullsFirst: false })
+    supabase.from('experience').select('*').order('start_date', { ascending: false, nullsFirst: false }),
+    supabase.from('settings').select('*')
   ])
+
+  const settings = (settingsData || []).reduce((acc: any, curr: any) => ({ ...acc, [curr.key]: curr.value }), {})
 
   return (
     <>
       <Navbar />
       <HeroSection />
-      <AboutSection />
+      <AboutSection 
+        profilePictureUrl={settings['profile_picture_url']} 
+        resumeUrl={settings['resume_url']} 
+      />
       <SkillsSection skills={skills || []} categories={categories || []} />
       <ProjectsSection projects={(projects || []).filter(p => p.is_published)} />
       <ExperienceSection experiences={experiences || []} />

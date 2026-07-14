@@ -292,3 +292,61 @@ export async function deleteExperience(id: string) {
   if (error) throw new Error(error.message)
   revalidatePath('/', 'layout')
 }
+
+// --- SETTINGS ---
+
+export async function getSettings() {
+  const supabase = await createClient()
+  const { data, error } = await supabase.from('settings').select('*')
+  if (error) return {}
+  
+  const settings: Record<string, string> = {}
+  data.forEach((row: any) => {
+    settings[row.key] = row.value
+  })
+  return settings
+}
+
+export async function updateSetting(key: string, value: string) {
+  const supabase = await createClient()
+  
+  // Check if exists
+  const { data } = await supabase.from('settings').select('id').eq('key', key).single()
+  
+  if (data) {
+    const { error } = await supabase.from('settings').update({ value }).eq('key', key)
+    if (error) throw new Error(error.message)
+  } else {
+    const { error } = await supabase.from('settings').insert([{ key, value }])
+    if (error) throw new Error(error.message)
+  }
+  
+  revalidatePath('/', 'layout')
+}
+
+export async function uploadSettingFile(formData: FormData) {
+  const supabase = await createClient()
+  
+  const file = formData.get('file') as File
+  const key = formData.get('key') as string
+  
+  if (!file || file.size === 0) throw new Error("No file provided")
+  if (!key) throw new Error("No key provided")
+
+  const fileExt = file.name.split('.').pop()
+  const fileName = `settings/${key}_${Date.now()}.${fileExt}`
+
+  const { error } = await supabase.storage
+    .from('portfolio_icons')
+    .upload(fileName, file)
+
+  if (error) throw new Error(`Upload failed: ${error.message}`)
+  
+  const { data: { publicUrl } } = supabase.storage
+    .from('portfolio_icons')
+    .getPublicUrl(fileName)
+
+  await updateSetting(key, publicUrl)
+  
+  return publicUrl
+}

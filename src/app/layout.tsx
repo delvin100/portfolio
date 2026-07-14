@@ -15,7 +15,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const caveat = Caveat({ subsets: ["latin"], variable: "--font-caveat" });
 
 export const metadata: Metadata = {
-  title: "Frontend Developer & UI Designer Portfolio",
+  title: "Delvin Varghese | Full Stack Developer",
   description: "I design and build fast, modern, and engaging digital experiences with clean code and exceptional user interfaces.",
 };
 

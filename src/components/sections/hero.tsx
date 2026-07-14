@@ -200,11 +200,11 @@ export function HeroSection() {
                     <br/>
                     {'  '}name: <span className="text-yellow-300">'Delvin Varghese'</span>,
                     <br/>
-                    {'  '}role: <span className="text-yellow-300">'Full Stack Engineer'</span>,
+                    {'  '}role: <span className="text-yellow-300">'Full Stack Developer'</span>,
                     <br/>
-                    {'  '}style: <span className="text-yellow-300">'Vibe Coder'</span>,
+                    {'  '}style: <span className="text-yellow-300">'Vibe Coding'</span>,
                     <br/>
-                    {'  '}skills: [<span className="text-yellow-300">'Next.js'</span>, <span className="text-yellow-300">'TypeScript'</span>, <span className="text-yellow-300">'Node.js'</span>, <span className="text-yellow-300">'Supabase'</span>],
+                    {'  '}skills: [<span className="text-yellow-300">'React'</span>, <span className="text-yellow-300">'TypeScript'</span>, <span className="text-yellow-300">'Node.js'</span>, <span className="text-yellow-300">'Databases'</span>],
                     <br/>
                     {'  '}passion: <span className="text-yellow-300">'Building scalable systems'</span>,
                     <br/>
