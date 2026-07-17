@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect, useTransition } from "react"
+import { useState, useEffect, useTransition, useRef } from "react"
 import { Search, MessageSquare, MoreVertical, Edit, Loader2, LogOut } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { searchUsers, startConversation } from "@/actions/chat"
+import { searchUsers, startConversation, getUserConversations } from "@/actions/chat"
 import { logout } from "@/actions/auth"
 import { useRouter } from "next/navigation"
 import {
@@ -18,6 +18,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
+import { createClient } from "@/lib/supabase/client"
+
 interface ChatSidebarProps {
   initialConversations: any[]
   currentUser: any
@@ -28,9 +30,35 @@ export function ChatSidebar({ initialConversations, currentUser }: ChatSidebarPr
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [conversations, setConversations] = useState(initialConversations)
   const router = useRouter()
+  
+  const supabase = useRef(createClient()).current
+  
+  // Listen for ANY message to update the sidebar
+  useEffect(() => {
+    const channel = supabase
+      .channel('sidebar-messages')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'Message' },
+        async (payload) => {
+          // Instead of router.refresh(), fetch the updated list of conversations from the server
+          // This prevents a heavy Next.js Server Components rebuild and just fetches JSON data.
+          try {
+            const updatedConversations = await getUserConversations()
+            setConversations(updatedConversations)
+          } catch (e) {
+            console.error(e)
+          }
+        }
+      )
+      .subscribe()
 
-  const conversations = initialConversations
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase])
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {

@@ -107,6 +107,7 @@ model ConversationMember {
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@unique([userId, conversationId])
+  @@index([userId])
 }
 
 model Message {
@@ -121,6 +122,9 @@ model Message {
   sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   attachments  Attachment[]
+
+  @@index([conversationId, createdAt(sort: Desc)])
+  @@index([senderId])
 }
 
 model Attachment {

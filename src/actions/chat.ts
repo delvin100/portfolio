@@ -133,7 +133,7 @@ export async function getConversationDetails(conversationId: string) {
   }
 }
 
-export async function getMessages(conversationId: string) {
+export async function getMessages(conversationId: string, cursor?: string, limit: number = 50) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -143,7 +143,9 @@ export async function getMessages(conversationId: string) {
 
   const messages = await prisma.message.findMany({
     where: { conversationId },
-    orderBy: { createdAt: 'asc' },
+    orderBy: { createdAt: 'desc' },
+    take: limit + 1,
+    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
     include: {
       sender: {
         select: {
@@ -155,7 +157,16 @@ export async function getMessages(conversationId: string) {
     }
   })
 
-  return messages
+  let nextCursor: string | undefined = undefined;
+  if (messages.length > limit) {
+    const nextItem = messages.pop()
+    nextCursor = nextItem!.id
+  }
+
+  return {
+    messages: messages.reverse(),
+    nextCursor
+  }
 }
 
 export async function sendMessage(conversationId: string, content: string) {
@@ -179,4 +190,56 @@ export async function sendMessage(conversationId: string, content: string) {
   })
 
   return message
+}
+
+export async function getUserConversations() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return []
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    include: {
+      conversations: {
+        include: {
+          conversation: {
+            include: {
+              messages: {
+                orderBy: { createdAt: 'desc' },
+                take: 1
+              },
+              members: {
+                where: { userId: { not: user.id } },
+                include: { user: true }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+
+  const conversations = dbUser?.conversations.map(member => {
+    const conv = member.conversation
+    const lastMessage = conv.messages[0]
+    const otherUser = conv.members[0]?.user
+    return {
+      id: conv.id,
+      name: conv.name || otherUser?.name || "Private Chat",
+      lastMessage: lastMessage ? lastMessage.content : "No messages yet",
+      time: lastMessage ? new Date(lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",
+      unread: 0,
+      online: false,
+    }
+  }) || []
+
+  // Sort conversations by latest message time
+  conversations.sort((a, b) => {
+    const timeA = dbUser?.conversations.find(c => c.conversationId === a.id)?.conversation.messages[0]?.createdAt.getTime() || 0;
+    const timeB = dbUser?.conversations.find(c => c.conversationId === b.id)?.conversation.messages[0]?.createdAt.getTime() || 0;
+    return timeB - timeA;
+  });
+
+  return conversations
 }

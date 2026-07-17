@@ -26,14 +26,16 @@ export function MessageInput({ conversationId }: MessageInputProps) {
     setMessage("")
     setIsTyping(false)
     
-    startTransition(async () => {
-      try {
-        await sendMessage(conversationId, content)
+    // Fire and forget - don't block the UI
+    sendMessage(conversationId, content)
+      .then(() => {
+        // Next.js refresh happens naturally through our realtime subscription anyway!
+        // but we can still call it here just in case
         router.refresh()
-      } catch (error) {
+      })
+      .catch((error) => {
         console.error("Failed to send message", error)
-      }
-    })
+      })
   }
 
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,17 +82,16 @@ export function MessageInput({ conversationId }: MessageInputProps) {
             onChange={handleTyping}
             placeholder="Type a message"
             className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-2 py-6"
-            disabled={isPending}
           />
         </div>
 
         <Button 
           type="submit" 
           size="icon" 
-          disabled={!message.trim() || isPending} 
+          disabled={!message.trim()} 
           className="rounded-full h-12 w-12 shrink-0 bg-primary hover:bg-primary/90"
         >
-          {isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5 ml-1" />}
+          <Send className="h-5 w-5 ml-1" />
         </Button>
       </form>
     </div>

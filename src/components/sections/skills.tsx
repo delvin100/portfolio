@@ -142,7 +142,7 @@ export function SkillsSection({ skills, categories }: { skills: Skill[], categor
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false, margin: "-50px" }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="relative p-[1px] rounded-3xl group"
+              className="relative p-[1px] rounded-3xl group h-full flex flex-col"
             >
               {/* Outer border gradient that shows on hover */}
               <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 rounded-3xl transition-opacity duration-500" />
@@ -161,7 +161,7 @@ export function SkillsSection({ skills, categories }: { skills: Skill[], categor
               <motion.div 
                 animate={landedIndex === index ? { y: [0, 6, 0], scale: [1, 0.98, 1] } : { y: 0, scale: 1 }}
                 transition={{ duration: 0.4, ease: "easeInOut" }}
-                className="relative h-full bg-surface/50 backdrop-blur-xl border border-border/50 rounded-3xl p-8 hover:bg-surface/80 transition-colors duration-500 flex flex-col z-10 overflow-hidden shadow-2xl"
+                className="relative h-full flex-1 bg-surface/50 backdrop-blur-xl border border-border/50 rounded-3xl p-8 hover:bg-surface/80 transition-colors duration-500 flex flex-col z-10 overflow-hidden shadow-2xl"
               >
                 
                 <div className="relative z-10 flex flex-col h-full">
@@ -171,19 +171,19 @@ export function SkillsSection({ skills, categories }: { skills: Skill[], categor
                   
                   <h3 className="text-2xl font-bold mb-8 tracking-tight text-foreground/90 group-hover:text-foreground transition-colors">{category.name}</h3>
                   
-                  <div className="flex flex-wrap gap-2.5 mt-auto">
+                  <div className="grid grid-rows-4 grid-flow-col gap-2.5 mt-auto overflow-x-auto pb-1 justify-start auto-cols-max" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                     {category.skills.map((skill, i) => (
-                      <motion.span
+                      <motion.div
                         key={skill.id}
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: false }}
                         transition={{ delay: 0.3 + (i * 0.05) }}
-                        className="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-full bg-white/5 text-slate-300 border border-white/10 hover:bg-primary/20 hover:text-primary hover:border-primary/30 transition-all duration-300 shadow-sm hover:shadow-primary/20 cursor-default"
+                        className="flex items-center gap-2 px-3 py-1.5 text-xs sm:text-sm font-medium rounded-full bg-white/5 text-slate-300 border border-white/10 hover:bg-primary/20 hover:text-primary hover:border-primary/30 transition-all duration-300 shadow-sm hover:shadow-primary/20 cursor-default whitespace-nowrap w-max"
                       >
-                        <IconRenderer iconType={skill.icon_type} iconValue={skill.icon} className="w-3.5 h-3.5" />
-                        {skill.name}
-                      </motion.span>
+                        <IconRenderer iconType={skill.icon_type} iconValue={skill.icon} className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">{skill.name}</span>
+                      </motion.div>
                     ))}
                   </div>
                 </div>

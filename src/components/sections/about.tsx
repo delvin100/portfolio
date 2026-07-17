@@ -53,25 +53,25 @@ export function AboutSection({ profilePictureUrl, resumeUrl }: AboutSectionProps
                 <p>
                   <span className="text-pink-400 font-bold">#</span> <span className="text-cyan-300 font-bold text-base tracking-wide">Introduction</span><br/>
                   <span className="inline-block mt-2 text-slate-400">
-                    I'm a Full Stack Developer specializing in building fast, scalable, and user-focused web applications. I enjoy transforming ideas into production-ready software using modern technologies like React, Next.js, Node.js, Express, MongoDB, PostgreSQL, and TypeScript. I'm passionate about writing clean, maintainable code and continuously improving both developer and user experiences.
+                    I'm a Full Stack Developer passionate about building fast, scalable, and user-focused web applications. Skilled in React, Next.js, Node.js, TypeScript, and modern databases, I focus on writing clean, maintainable code and delivering high-performance, production-ready solutions.
                   </span>
                 </p>
                 <p>
                   <span className="text-pink-400 font-bold">##</span> <span className="text-yellow-300 font-semibold tracking-wide">What I Do</span><br/>
                   <span className="inline-block mt-2 text-slate-400">
-                    I design and build complete web applications—from architecting databases and developing secure REST APIs to creating responsive, accessible, and interactive user interfaces. My focus is on delivering applications that are performant, scalable, and easy to maintain.
+                    I build end-to-end web applications, from designing databases and developing secure APIs to creating fast, responsive, and accessible user interfaces. I focus on building scalable, maintainable, and production-ready solutions.
                   </span>
                 </p>
                 <p>
                   <span className="text-pink-400 font-bold">##</span> <span className="text-yellow-300 font-semibold tracking-wide">My Philosophy</span><br/>
                   <span className="inline-block mt-2 text-slate-400">
-                    I enjoy solving challenging engineering problems, whether it's designing scalable backend systems, optimizing database performance, or refining frontend interactions. I believe exceptional software comes from balancing clean architecture, performance, maintainability, and thoughtful user experience.
+                    I enjoy solving complex engineering challenges with clean architecture, efficient code, and thoughtful user experiences. I believe great software is built by balancing performance, scalability, maintainability, and usability.
                   </span>
                 </p>
                 <p>
                   <span className="text-pink-400 font-bold">##</span> <span className="text-yellow-300 font-semibold tracking-wide">Current Focus</span><br/>
                   <span className="inline-block mt-2 text-slate-400">
-                    I'm currently expanding my expertise in real-time applications and WebSockets, modern React & Next.js architecture, performance optimization, scalable backend systems, and AI-powered web applications and intelligent user experiences.
+                    While I continue building full-stack web applications, I'm currently expanding my knowledge in cybersecurity, secure application development, modern web architecture, and AI-powered applications to build more resilient and intelligent software.
                   </span>
                 </p>
               </div>
@@ -114,6 +114,7 @@ export function AboutSection({ profilePictureUrl, resumeUrl }: AboutSectionProps
                   alt="Delvin Varghese" 
                   fill 
                   sizes="(max-width: 768px) 100vw, 50vw"
+                  priority
                   className="object-cover transition-transform duration-700 group-hover:scale-110" 
                 />
               </div>

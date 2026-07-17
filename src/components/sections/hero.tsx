@@ -204,7 +204,7 @@ export function HeroSection() {
                     <br/>
                     {'  '}style: <span className="text-yellow-300">'Vibe Coding'</span>,
                     <br/>
-                    {'  '}skills: [<span className="text-yellow-300">'React'</span>, <span className="text-yellow-300">'TypeScript'</span>, <span className="text-yellow-300">'Node.js'</span>, <span className="text-yellow-300">'Databases'</span>],
+                    {'  '}skills: [<span className="text-yellow-300">'React'</span>, <span className="text-yellow-300">'Node.js'</span>, <span className="text-yellow-300">'MySQL'</span>],
                     <br/>
                     {'  '}passion: <span className="text-yellow-300">'Building scalable systems'</span>,
                     <br/>

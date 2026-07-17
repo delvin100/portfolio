@@ -24,7 +24,7 @@ export default async function ChatWindow(props: { params: Promise<{ conversation
     return <div className="flex items-center justify-center h-full">Conversation not found.</div>
   }
   
-  const messages = await getMessages(conversationId)
+  const { messages, nextCursor } = await getMessages(conversationId)
   
   const { otherUser } = details
   const fallback = otherUser?.name?.substring(0, 2).toUpperCase() || "U"
@@ -58,7 +58,12 @@ export default async function ChatWindow(props: { params: Promise<{ conversation
       </div>
 
       {/* Message List */}
-      <MessageList initialMessages={messages} currentUserId={user.id} conversationId={conversationId} />
+      <MessageList 
+        initialMessages={messages} 
+        initialNextCursor={nextCursor}
+        currentUserId={user.id} 
+        conversationId={conversationId} 
+      />
 
       {/* Input Area */}
       <MessageInput conversationId={conversationId} />
