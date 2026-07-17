@@ -36,19 +36,27 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
-  const isLoginRoute = request.nextUrl.pathname === '/login'
+  const isChatRoute = request.nextUrl.pathname.startsWith('/chat') && !request.nextUrl.pathname.startsWith('/chat-')
+  const isLoginRoute = request.nextUrl.pathname === '/chat-login' || request.nextUrl.pathname === '/chat-register'
 
   if (isAdminRoute && !user) {
-    // no user, potentially respond by redirecting the user to the login page
+    // Admin login is still at /login
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  if (isLoginRoute && user) {
-    // user is already logged in, redirect to admin dashboard
+  if (isChatRoute && !user) {
+    // no user, potentially respond by redirecting the user to the chat login page
     const url = request.nextUrl.clone()
-    url.pathname = '/admin'
+    url.pathname = '/chat-login'
+    return NextResponse.redirect(url)
+  }
+
+  if (isLoginRoute && user) {
+    // user is already logged in, redirect to chat
+    const url = request.nextUrl.clone()
+    url.pathname = '/chat'
     return NextResponse.redirect(url)
   }
 
