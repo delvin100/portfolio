@@ -36,33 +36,12 @@ export function ScrollToTop() {
           exit={{ opacity: 0, scale: 0.8, y: 20 }}
           className="hidden md:flex fixed bottom-8 right-8 z-50"
         >
-          {/* Holographic Ripple 1 */}
-          <motion.div 
-            animate={{ scale: [1, 1.5], opacity: [0.6, 0] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut" }}
-            className="absolute inset-0 rounded-full border border-primary/50 pointer-events-none"
-          />
-          {/* Holographic Ripple 2 */}
-          <motion.div 
-            animate={{ scale: [1, 1.5], opacity: [0.6, 0] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut", delay: 1.25 }}
-            className="absolute inset-0 rounded-full border border-primary/50 pointer-events-none"
-          />
-          
           <button
             onClick={scrollToTop}
-            className="group relative flex items-center justify-center w-12 h-12 rounded-full bg-black/40 backdrop-blur-xl border border-primary/40 text-primary hover:bg-primary/10 hover:border-primary transition-all duration-300 overflow-hidden shadow-[0_0_15px_rgba(0,0,0,0.5)] hover:shadow-[0_0_25px_rgba(59,130,246,0.3)]"
+            className="group flex items-center justify-center w-12 h-12 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-slate-300 hover:bg-primary/20 hover:border-primary/50 hover:text-primary transition-all duration-300 shadow-lg hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:-translate-y-1"
             aria-label="Scroll to top"
           >
-            {/* Shimmer effect */}
-            <motion.div 
-              initial={{ x: "-100%" }}
-              whileHover={{ x: "200%" }}
-              transition={{ duration: 1, ease: "easeInOut", repeat: Infinity, repeatDelay: 0.5 }}
-              className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 pointer-events-none z-0" 
-            />
-            
-            <ArrowUp size={20} strokeWidth={2.5} className="group-hover:-translate-y-1 group-hover:scale-110 transition-transform duration-300 relative z-10" />
+            <ArrowUp size={20} strokeWidth={2.5} className="group-hover:-translate-y-1 transition-transform duration-300" />
           </button>
         </motion.div>
       )}

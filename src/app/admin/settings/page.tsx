@@ -2,18 +2,24 @@
 
 import { useState, useEffect } from 'react'
 import { uploadSettingFile, updateSetting, getSettings } from '@/app/actions/portfolio'
+import { updateAccountEmail, updateAccountPassword, getCurrentUser } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { Loader2, Upload, Link as LinkIcon, FileImage, FileText, CheckCircle2 } from 'lucide-react'
+import { Loader2, Upload, Link as LinkIcon, FileImage, FileText, CheckCircle2, Lock, Mail, Key, Eye, EyeOff } from 'lucide-react'
 
 type InputMode = 'upload' | 'url'
 
 export default function SettingsPage() {
   const [isUploadingResume, setIsUploadingResume] = useState(false)
   const [isUploadingProfile, setIsUploadingProfile] = useState(false)
+  const [isUpdatingEmail, setIsUpdatingEmail] = useState(false)
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [currentEmail, setCurrentEmail] = useState<string | null>(null)
   
   const [resumeMode, setResumeMode] = useState<InputMode>('upload')
   const [profileMode, setProfileMode] = useState<InputMode>('upload')
@@ -29,6 +35,9 @@ export default function SettingsPage() {
       const settings = await getSettings()
       if (settings['resume_url']) setCurrentResume(settings['resume_url'])
       if (settings['profile_picture_url']) setCurrentProfile(settings['profile_picture_url'])
+      
+      const user = await getCurrentUser()
+      if (user?.email) setCurrentEmail(user.email)
     } catch (e) {
       console.error(e)
     }
@@ -88,10 +97,50 @@ export default function SettingsPage() {
     }
   }
 
+  const handleEmailUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsUpdatingEmail(true)
+    const formData = new FormData(e.currentTarget)
+    try {
+      await updateAccountEmail(formData)
+      toast.success('Email updated successfully!')
+      ;(e.target as HTMLFormElement).reset()
+      await fetchSettings()
+    } catch (error: any) {
+      toast.error(error.message)
+    } finally {
+      setIsUpdatingEmail(false)
+    }
+  }
+
+  const handlePasswordUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsUpdatingPassword(true)
+    const formData = new FormData(e.currentTarget)
+    
+    const password = formData.get('password') as string
+    const confirmPassword = formData.get('confirm-password') as string
+    
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match')
+      setIsUpdatingPassword(false)
+      return
+    }
+    try {
+      await updateAccountPassword(formData)
+      toast.success('Password updated successfully!')
+      ;(e.target as HTMLFormElement).reset()
+    } catch (error: any) {
+      toast.error(error.message)
+    } finally {
+      setIsUpdatingPassword(false)
+    }
+  }
+
   return (
     <div className="space-y-8 max-w-5xl mx-auto py-6 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Manage Site</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
         <p className="text-muted-foreground mt-2 text-sm sm:text-base">
           Manage your global site configuration.
         </p>
@@ -316,6 +365,146 @@ export default function SettingsPage() {
                 </a>
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Security & Account Card */}
+        <Card className="relative border-muted/30 shadow-xl shadow-black/5 bg-surface/40 backdrop-blur-sm overflow-hidden group mt-1 lg:col-span-2">
+          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-500 to-orange-400 transform origin-left transition-transform group-hover:scale-x-100" />
+          <CardHeader className="pb-4 pt-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-red-500/10 rounded-xl">
+                <Lock className="w-6 h-6 text-red-500" />
+              </div>
+              <div>
+                <CardTitle className="text-xl">Security & Account</CardTitle>
+                <CardDescription className="mt-1">
+                  Update your admin login credentials.
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              
+              {/* Email Form */}
+              <div className="relative border border-white/5 rounded-2xl p-6 bg-black/20 backdrop-blur-sm overflow-hidden group/form transition-colors hover:bg-black/30 hover:border-white/10 flex flex-col h-full">
+                <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent opacity-0 group-hover/form:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                
+                <div className="relative z-10 mb-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Mail className="w-4 h-4 text-red-400" />
+                    <h3 className="font-semibold text-white">Change Email</h3>
+                  </div>
+                  <p className="text-xs text-slate-400">Update the email address used for admin login.</p>
+                </div>
+                
+                <form onSubmit={handleEmailUpdate} className="relative z-10 flex-1 flex flex-col">
+                  <div className="space-y-4 mb-6">
+                    <div className="space-y-2">
+                      <Label className="text-slate-300 text-xs uppercase tracking-wider font-mono">Current Email</Label>
+                      <Input 
+                        type="email"
+                        value={currentEmail || "Loading..."} 
+                        className="bg-white/5 border-white/10 text-slate-400 h-11 cursor-not-allowed opacity-70" 
+                        readOnly 
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="new-email" className="text-slate-300 text-xs uppercase tracking-wider font-mono">New Email Address</Label>
+                      <Input 
+                        id="new-email"
+                        name="email" 
+                        type="email"
+                        placeholder="admin@example.com" 
+                        className="bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus-visible:ring-red-500/50 focus-visible:border-red-500/50 h-11" 
+                        required 
+                      />
+                    </div>
+                  </div>
+                  <Button type="submit" disabled={isUpdatingEmail} className="w-full h-11 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white font-medium shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:shadow-[0_0_25px_rgba(239,68,68,0.4)] transition-all mt-auto">
+                    {isUpdatingEmail ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Updating...</>
+                    ) : (
+                      <>Update Email</>
+                    )}
+                  </Button>
+                </form>
+              </div>
+
+              {/* Password Form */}
+              <div className="relative border border-white/5 rounded-2xl p-6 bg-black/20 backdrop-blur-sm overflow-hidden group/form transition-colors hover:bg-black/30 hover:border-white/10 flex flex-col h-full">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover/form:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                
+                <div className="relative z-10 mb-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Key className="w-4 h-4 text-orange-400" />
+                    <h3 className="font-semibold text-white">Change Password</h3>
+                  </div>
+                  <p className="text-xs text-slate-400">Must be at least 6 characters long.</p>
+                </div>
+                
+                <form onSubmit={handlePasswordUpdate} className="relative z-10 flex-1 flex flex-col">
+                  <div className="space-y-4 mb-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password" className="text-slate-300 text-xs uppercase tracking-wider font-mono">New Password</Label>
+                      <div className="relative">
+                        <Input 
+                          id="new-password"
+                          name="password" 
+                          type={showPassword ? "text" : "password"}
+                          placeholder="••••••••" 
+                          className="bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus-visible:ring-orange-500/50 focus-visible:border-orange-500/50 h-11 pr-12" 
+                          required 
+                          minLength={6}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-orange-400 transition-colors p-1 outline-none focus-visible:text-orange-400"
+                          tabIndex={-1}
+                        >
+                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password" className="text-slate-300 text-xs uppercase tracking-wider font-mono">Confirm Password</Label>
+                      <div className="relative">
+                        <Input 
+                          id="confirm-password"
+                          name="confirm-password" 
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="••••••••" 
+                          className="bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus-visible:ring-orange-500/50 focus-visible:border-orange-500/50 h-11 pr-12" 
+                          required 
+                          minLength={6}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-orange-400 transition-colors p-1 outline-none focus-visible:text-orange-400"
+                          tabIndex={-1}
+                        >
+                          {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Button type="submit" disabled={isUpdatingPassword} className="w-full h-11 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-medium shadow-[0_0_15px_rgba(249,115,22,0.2)] hover:shadow-[0_0_25px_rgba(249,115,22,0.4)] transition-all mt-auto">
+                    {isUpdatingPassword ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Updating...</>
+                    ) : (
+                      <>Update Password</>
+                    )}
+                  </Button>
+                </form>
+              </div>
+
+            </div>
           </CardContent>
         </Card>
 

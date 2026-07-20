@@ -31,62 +31,41 @@ export default async function AdminOverviewPage() {
   const stats = await getStats()
 
   const cards = [
-    { title: 'Total Projects', value: stats.projects, icon: Briefcase, color: 'text-blue-500', href: '/admin/projects' },
-    { title: 'Experience Roles', value: stats.experience, icon: FileText, color: 'text-amber-500', href: '/admin/experience' },
-    { title: 'Skills Tracked', value: stats.skills, icon: Code, color: 'text-green-500', href: '/admin/skills' },
+    { title: 'Total Projects', value: stats.projects, icon: Briefcase, color: 'text-blue-400', href: '/admin/projects' },
+    { title: 'Experience Roles', value: stats.experience, icon: FileText, color: 'text-amber-400', href: '/admin/experience' },
+    { title: 'Skills Tracked', value: stats.skills, icon: Code, color: 'text-emerald-400', href: '/admin/skills' },
   ]
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard Overview</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="text-3xl font-bold tracking-tight text-white">Dashboard Overview</h1>
+        <p className="text-slate-400 mt-2 font-light">
           Welcome back! Here is a summary of your portfolio content.
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3">
         {cards.map((card) => (
-          <Link href={card.href} key={card.title}>
-            <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full">
+          <Link href={card.href} key={card.title} className="group outline-none">
+            <Card className="h-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 rounded-2xl relative">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-                <card.icon className={`h-4 w-4 ${card.color}`} />
+                <CardTitle className="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">{card.title}</CardTitle>
+                <div className="p-2.5 rounded-xl bg-black/20 border border-white/5 group-hover:border-white/10 transition-colors">
+                  <card.icon className={`h-5 w-5 ${card.color}`} />
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{card.value}</div>
+              <CardContent className="pt-4">
+                <div className="text-4xl font-bold tracking-tight text-white">
+                  {card.value}
+                </div>
               </CardContent>
             </Card>
           </Link>
         ))}
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Feature coming soon... You'll see your recent updates here.
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Quick Links</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col space-y-2">
-            <a href="/" target="_blank" className="text-sm text-primary hover:underline flex items-center">
-              View Public Portfolio
-            </a>
-            <a href="https://supabase.com/dashboard" target="_blank" className="text-sm text-primary hover:underline flex items-center">
-              Supabase Dashboard
-            </a>
-          </CardContent>
-        </Card>
-      </div>
+
     </div>
   )
 }

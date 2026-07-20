@@ -11,7 +11,7 @@ const navItems = [
   { href: '/admin/projects', label: 'Projects', icon: Briefcase },
   { href: '/admin/experience', label: 'Experience', icon: FileText },
   { href: '/admin/skills', label: 'Skills', icon: Code },
-  { href: '/admin/settings', label: 'Manage Site', icon: Settings },
+  { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

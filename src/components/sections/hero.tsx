@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { ArrowRight, Terminal } from "lucide-react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 function TypewriterHeading() {
   const [text1, setText1] = useState("")
@@ -82,6 +83,22 @@ function TypewriterHeading() {
 }
 
 export function HeroSection() {
+  const router = useRouter()
+  const [clickTimes, setClickTimes] = useState<number[]>([])
+
+  const handleAdminClick = () => {
+    const now = Date.now()
+    // Keep only clicks from the last 2 seconds
+    const recentClicks = clickTimes.filter(time => now - time < 2000)
+    const newClicks = [...recentClicks, now]
+    setClickTimes(newClicks)
+    
+    if (newClicks.length >= 3) {
+      router.push("/admin")
+      setClickTimes([]) // Reset after redirect
+    }
+  }
+
   return (
     <section className="min-h-screen flex items-center justify-center pt-20 pb-12 overflow-hidden relative">
       {/* Subtle background glow */}
@@ -100,12 +117,15 @@ export function HeroSection() {
               transition={{ duration: 0.5 }}
               className="flex justify-center lg:justify-start mb-8"
             >
-              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md shadow-lg">
+              <div 
+                onClick={handleAdminClick}
+                className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md shadow-lg group hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer select-none"
+              >
                 <span className="relative flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                 </span>
-                <span className="text-sm font-medium text-slate-200 tracking-wide uppercase text-[0.7rem]">
+                <span className="text-sm font-medium text-slate-200 tracking-wide uppercase text-[0.7rem] group-hover:text-white transition-colors">
                   Available for work
                 </span>
               </div>
@@ -132,17 +152,6 @@ export function HeroSection() {
               className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto"
             >
               <div className="relative w-full sm:w-auto">
-                {/* Holographic Button Ripples */}
-                <motion.div 
-                  animate={{ scale: [1, 1.25], opacity: [0.6, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeOut" }}
-                  className="absolute inset-0 rounded-lg border border-primary/50 pointer-events-none"
-                />
-                <motion.div 
-                  animate={{ scale: [1, 1.25], opacity: [0.6, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeOut", delay: 2 }}
-                  className="absolute inset-0 rounded-lg border border-primary/50 pointer-events-none"
-                />
                 <a
                   href="#contact"
                   className="group relative inline-flex items-center justify-center px-8 py-4 font-mono text-sm font-bold text-primary bg-[#050505] border border-primary/40 rounded-lg overflow-hidden transition-all hover:bg-primary/5 hover:border-primary hover:shadow-[0_0_25px_rgba(var(--primary),0.3)] hover:-translate-y-1 z-10 w-full"
@@ -150,7 +159,6 @@ export function HeroSection() {
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out" />
                   <span className="mr-3 text-pink-500 font-black text-base">{">"}</span>
                   <span className="tracking-wider text-base">Let's Talk</span>
-                  <span className="ml-2 w-2.5 h-5 bg-primary animate-pulse opacity-80 group-hover:opacity-100 transition-opacity duration-300"></span>
                 </a>
               </div>
               
