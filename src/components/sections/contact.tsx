@@ -123,7 +123,7 @@ export function ContactSection() {
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Location</h4>
-                  <p className="text-lg">Chunkappara, Pathanamthitta, Kerala, India</p>
+                  <p className="text-lg">Kerala, India</p>
                 </div>
               </div>
             </div>

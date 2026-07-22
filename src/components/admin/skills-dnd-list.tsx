@@ -553,7 +553,7 @@ export function SkillsDndList({ initialSkills, categories: initialCategories }: 
           >
             {isSaving ? "Saving..." : (
               <>
-                <Save className="mr-2 h-4 w-4" />
+                <Save className="h-4 w-4" />
                 Save Layout Order
               </>
             )}

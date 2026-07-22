@@ -53,7 +53,7 @@ export function Footer() {
               Navigation
             </h4>
             <nav className="grid grid-cols-2 gap-y-3 gap-x-8">
-              {['Home', 'About', 'Skills', 'Projects', 'Experience', 'Contact'].map((item) => (
+              {['Home', 'About', 'Skills', 'Projects', 'Experience', 'Certifications'].map((item) => (
                 <Link 
                   key={item} 
                   href={item === 'Home' ? '/' : `/#${item.toLowerCase()}`}

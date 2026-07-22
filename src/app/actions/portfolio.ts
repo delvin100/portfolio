@@ -427,3 +427,67 @@ export async function uploadSettingFile(formData: FormData) {
   
   return publicUrl
 }
+// --- CERTIFICATIONS ---
+
+export async function createCertification(formData: FormData) {
+  const supabase = await createClient()
+  
+  const data = {
+    name: formData.get('name') as string,
+    issuer: formData.get('issuer') as string,
+    date: formData.get('date') ? formData.get('date') as string : null,
+    description: formData.get('description') as string,
+    linkedin_url: formData.get('linkedin_url') as string,
+    order_index: Number(formData.get('order_index') || 0),
+  }
+
+  const { error } = await supabase.from('certifications').insert([data])
+  if (error) throw new Error(error.message)
+  
+  revalidatePath('/', 'layout')
+  redirect('/admin/certifications?success=certification_added')
+}
+
+export async function updateCertification(id: string, formData: FormData) {
+  const supabase = await createClient()
+  
+  const data = {
+    name: formData.get('name') as string,
+    issuer: formData.get('issuer') as string,
+    date: formData.get('date') ? formData.get('date') as string : null,
+    description: formData.get('description') as string,
+    linkedin_url: formData.get('linkedin_url') as string,
+    order_index: Number(formData.get('order_index') || 0),
+  }
+
+  const { error } = await supabase.from('certifications').update(data).eq('id', id)
+  if (error) throw new Error(error.message)
+  
+  revalidatePath('/', 'layout')
+  redirect('/admin/certifications?success=certification_updated')
+}
+
+export async function deleteCertification(id: string) {
+  const supabase = await createClient()
+  const { error } = await supabase.from('certifications').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+  revalidatePath('/', 'layout')
+}
+
+export async function deleteCertifications(ids: string[]) {
+  const supabase = await createClient()
+  const { error } = await supabase.from('certifications').delete().in('id', ids)
+  if (error) throw new Error(error.message)
+  revalidatePath('/', 'layout')
+}
+
+export async function updateCertificationsOrder(items: { id: string, order_index: number }[]) {
+  const supabase = await createClient()
+  
+  for (const item of items) {
+    const { error } = await supabase.from('certifications').update({ order_index: item.order_index }).eq('id', item.id)
+    if (error) throw new Error(error.message)
+  }
+  
+  revalidatePath('/', 'layout')
+}

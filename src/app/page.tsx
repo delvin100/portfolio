@@ -8,6 +8,7 @@ import { ProjectsSection } from "@/components/sections/projects"
 import { ExperienceSection } from "@/components/sections/experience"
 import { OpenSourceSection } from "@/components/sections/open-source"
 import { ContactSection } from "@/components/sections/contact"
+import { CertificationsSection } from "@/components/sections/certifications"
 
 export const revalidate = 60; // Cache this page for 1 minute (60 seconds)
 
@@ -20,13 +21,15 @@ export default async function Home() {
     { data: skills },
     { data: categories },
     { data: experiences },
-    { data: settingsData }
+    { data: settingsData },
+    { data: certifications }
   ] = await Promise.all([
     supabase.from('projects').select('*').order('order_index', { ascending: true }),
     supabase.from('skills').select('*').order('order_index', { ascending: true }),
     supabase.from('skill_categories').select('*').order('order_index', { ascending: true }),
     supabase.from('experience').select('*').order('order_index', { ascending: true }).order('start_date', { ascending: false, nullsFirst: false }),
-    supabase.from('settings').select('*')
+    supabase.from('settings').select('*'),
+    supabase.from('certifications').select('*').order('order_index', { ascending: true }).order('date', { ascending: false, nullsFirst: false })
   ])
 
   const settings = (settingsData || []).reduce((acc: any, curr: any) => ({ ...acc, [curr.key]: curr.value }), {})
@@ -42,6 +45,7 @@ export default async function Home() {
       <SkillsSection skills={skills || []} categories={categories || []} />
       <ProjectsSection projects={(projects || []).filter(p => p.is_published)} />
       <ExperienceSection experiences={experiences || []} />
+      <CertificationsSection certifications={certifications || []} />
       <OpenSourceSection />
       <ContactSection />
       <Footer />
