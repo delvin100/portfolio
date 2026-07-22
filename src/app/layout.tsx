@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Geist, Caveat } from "next/font/google";
-import "./globals.css";
+import "./globals.css"
+import { AnalyticsTracker } from "@/components/analytics-tracker";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { LoadingScreen } from "@/components/loading-screen";
@@ -29,10 +30,11 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`} suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
+          <AnalyticsTracker />
           <LoadingScreen />
           <div className="relative min-h-screen flex flex-col selection:bg-primary/30 selection:text-primary-foreground">
             {/* Background Blob Effects */}

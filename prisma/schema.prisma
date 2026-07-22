@@ -137,3 +137,10 @@ model Attachment {
   
   message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
 }
+
+model PageView {
+  id        String   @id @default(uuid())
+  path      String
+  userAgent String?
+  createdAt DateTime @default(now())
+}

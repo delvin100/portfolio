@@ -5,7 +5,6 @@ import { Eye, Paperclip, Terminal } from "lucide-react"
 import { SectionHeader } from "../ui/section-header"
 
 import Image from "next/image"
-
 interface AboutSectionProps {
   profilePictureUrl?: string;
   resumeUrl?: string;

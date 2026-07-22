@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/server'
-import { Briefcase, Code, FileText, Award } from 'lucide-react'
+import { Briefcase, Code, FileText, Eye, Users } from 'lucide-react'
 import Link from 'next/link'
+import { prisma } from '@/lib/prisma'
 
 async function getStats() {
   const supabase = await createClient()
@@ -11,19 +12,22 @@ async function getStats() {
     { count: projectsCount },
     { count: skillsCount },
     { count: expCount },
-    { count: certsCount }
+    usersCount,
+    pageViewsCount,
   ] = await Promise.all([
     supabase.from('projects').select('*', { count: 'exact', head: true }),
     supabase.from('skills').select('*', { count: 'exact', head: true }),
     supabase.from('experience').select('*', { count: 'exact', head: true }),
-    supabase.from('certifications').select('*', { count: 'exact', head: true }),
+    prisma.user.count(),
+    prisma.pageView.count(),
   ])
 
   return {
     projects: projectsCount || 0,
     skills: skillsCount || 0,
     experience: expCount || 0,
-    certifications: certsCount || 0,
+    users: usersCount || 0,
+    views: pageViewsCount || 0,
   }
 }
 
@@ -34,6 +38,8 @@ export default async function AdminOverviewPage() {
     { title: 'Total Projects', value: stats.projects, icon: Briefcase, color: 'text-blue-400', href: '/admin/projects' },
     { title: 'Experience Roles', value: stats.experience, icon: FileText, color: 'text-amber-400', href: '/admin/experience' },
     { title: 'Skills Tracked', value: stats.skills, icon: Code, color: 'text-emerald-400', href: '/admin/skills' },
+    { title: 'Registered Users', value: stats.users, icon: Users, color: 'text-purple-400', href: '/admin/users' },
+    { title: 'Portfolio Views', value: stats.views, icon: Eye, color: 'text-indigo-400', href: '/admin' },
   ]
 
   return (
@@ -45,7 +51,7 @@ export default async function AdminOverviewPage() {
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {cards.map((card) => (
           <Link href={card.href} key={card.title} className="group outline-none">
             <Card className="h-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 rounded-2xl relative">

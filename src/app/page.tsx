@@ -6,6 +6,7 @@ import { AboutSection } from "@/components/sections/about"
 import { SkillsSection } from "@/components/sections/skills"
 import { ProjectsSection } from "@/components/sections/projects"
 import { ExperienceSection } from "@/components/sections/experience"
+import { OpenSourceSection } from "@/components/sections/open-source"
 import { ContactSection } from "@/components/sections/contact"
 
 export const revalidate = 60; // Cache this page for 1 minute (60 seconds)
@@ -41,6 +42,7 @@ export default async function Home() {
       <SkillsSection skills={skills || []} categories={categories || []} />
       <ProjectsSection projects={(projects || []).filter(p => p.is_published)} />
       <ExperienceSection experiences={experiences || []} />
+      <OpenSourceSection />
       <ContactSection />
       <Footer />
     </>
