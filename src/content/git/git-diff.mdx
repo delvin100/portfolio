@@ -1,0 +1,29 @@
+---
+title: "git diff"
+description: "Show changes between commits, commit and working tree, etc."
+category: "Files"
+difficulty: "Intermediate"
+tags: ["diff","changes","compare"]
+---
+
+The `git diff` command is used to compare changes in your files. It shows you exactly which lines of code were added (in green) and which lines were deleted (in red).
+
+## Common Usage
+
+### See unstaged changes
+```bash
+git diff
+```
+Shows all the changes you have made in your files that **have not** been staged yet (files you haven't run `git add` on).
+
+### See staged changes
+```bash
+git diff --staged
+```
+Shows the changes you have added to the staging area that are waiting to be committed.
+
+### Compare two branches
+```bash
+git diff main feature-branch
+```
+Shows the difference between your `main` branch and a feature branch.

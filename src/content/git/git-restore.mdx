@@ -1,0 +1,24 @@
+---
+title: "git restore"
+description: "Restore working tree files."
+category: "Undo Changes"
+difficulty: "Intermediate"
+tags: ["restore","undo","files"]
+order: 1
+---
+
+The `git restore` command helps you un-modify or un-stage a file. It is the modern, safer alternative to using `git checkout` for file restoration.
+
+## Common Usage
+
+### Discard changes in a file
+```bash
+git restore index.html
+```
+If you completely broke `index.html` and haven't committed it yet, this command throws away your unsaved changes and restores the file to how it looked in your last commit.
+
+### Unstage a file
+```bash
+git restore --staged index.html
+```
+If you accidentally ran `git add index.html` but decided you don't want to commit it yet, this command pulls it back out of the staging area (but keeps your changes in the file itself).

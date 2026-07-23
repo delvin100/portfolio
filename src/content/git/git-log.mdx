@@ -1,0 +1,29 @@
+---
+title: "git log"
+description: "View the commit history of your repository."
+category: "History"
+difficulty: "Beginner"
+tags: ["log","history","commits"]
+---
+
+The `git log` command displays a list of all the commits (saves) that have been made in the repository's history. It is your primary tool for seeing what has happened in the project, who made changes, and when.
+
+## Common Usage
+
+### View full history
+```bash
+git log
+```
+This prints out a detailed list of every commit, including the author's name, email, date, and the full commit message. Press `q` to exit the list.
+
+### View a condensed history
+```bash
+git log --oneline
+```
+This is the most popular way to use `git log`. It shrinks each commit down to a single line showing only the short ID hash and the message, making it very easy to skim.
+
+### View history as a graph
+```bash
+git log --graph --oneline --all
+```
+This draws a text-based graph showing how different branches have diverged and merged over time.

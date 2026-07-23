@@ -1,0 +1,25 @@
+---
+title: "git fetch"
+description: "Download objects and refs from another repository."
+category: "Remote"
+difficulty: "Intermediate"
+tags: ["fetch","download","remote","sync"]
+---
+
+The `git fetch` command downloads commits, files, and refs from a remote repository into your local repository. 
+
+Crucially, **it does not modify your working files**. It only updates your hidden `.git` folder so you can see what your teammates have been working on before deciding to merge those changes.
+
+## Common Usage
+
+### Fetch from default remote
+```bash
+git fetch
+```
+Downloads all new data from the default remote (usually `origin`).
+
+### Fetch and prune deleted branches
+```bash
+git fetch --prune
+```
+Downloads new data and cleans up any local tracking branches if they have been deleted on GitHub.

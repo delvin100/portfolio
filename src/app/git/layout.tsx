@@ -44,7 +44,7 @@ export default function GitDocsLayout({
 
       <div className="container max-w-screen-2xl px-4 md:px-8 flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] lg:grid-cols-[240px_minmax(0,1fr)] print:block">
         {/* Left Sidebar */}
-        <aside className="print:hidden fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 md:sticky md:block">
+        <aside className="print:hidden fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 md:sticky md:block border-r border-border/50">
           <Sidebar navItems={navItems} />
         </aside>
 

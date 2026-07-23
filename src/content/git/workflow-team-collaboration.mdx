@@ -1,0 +1,119 @@
+---
+title: "Team Collaboration Workflow"
+description: "The complete step-by-step process for working on a Git project with other teammates."
+category: "Workflows"
+difficulty: "Intermediate"
+tags: ["workflow","team","collaboration","branch","pull"]
+order: 3
+---
+
+This workflow guides you through the exact commands you need when working on a repository with other people. It ensures you don't overwrite their code and safely merge your new features without conflicts.
+
+## 1. Get the Latest Code
+
+Before you start working for the day, **always** make sure you have the newest code that your teammates might have uploaded while you were away!
+
+Download latest changes:
+```bash
+git pull origin main
+```
+* **What this does:** 
+  * `pull` connects to GitHub (`origin`) and downloads any new commits on the `main` branch, merging them directly into your local folder.
+  * *Analogy:* This is like checking your mailbox in the morning to see if your teammates sent you any updated documents before you start your own work.
+
+## 2. Create a Feature Branch
+
+Never work directly on the `main` branch when on a team! Always create an isolated workspace for your specific task so you don't interfere with others.
+
+Create and switch to a new branch:
+```bash
+git checkout -b feature/new-login
+```
+* **What this does:** 
+  * `checkout -b` creates a brand new branch called `feature/new-login` and immediately switches your folder over to it.
+  * *Analogy:* Imagine `main` is the official master copy of a book. Creating a branch is like photocopying the entire book so you can scribble notes and edits on your copy without ruining the original.
+
+## 3. Save Your Work
+
+As you make progress on your feature, save your work normally just like you would on your own project.
+
+Stage and commit your changes:
+```bash
+git add .
+git commit -m "Built the new login form"
+```
+* **What this does:** 
+  * `add .` gathers up all the files you edited and prepares them.
+  * `commit` permanently saves that snapshot and labels it with your message.
+
+## 4. Share Your Branch
+
+Once your feature is complete, you need to upload your specific branch to GitHub so your teammates can review it.
+
+Push your branch to GitHub:
+```bash
+git push -u origin feature/new-login
+```
+* **What this does:** 
+  * `push` uploads your saved commits to GitHub.
+  * `-u origin feature/new-login` tells Git to create a brand new branch on GitHub with the exact same name, and remembers the link for next time.
+
+## 5. Sync With Main (When Necessary)
+
+If a teammate uploaded code to `main` while you were working on your branch, GitHub might prevent you from merging your code until you incorporate their changes.
+
+Update your branch with their new code:
+```bash
+git fetch origin
+git rebase origin/main
+```
+* **What this does:** 
+  * `fetch` downloads your teammates' latest code from GitHub without touching your files yet.
+  * `rebase` temporarily pauses your work, applies your teammates' newest code into your folder, and then magically places your new commits right on top of theirs!
+  * *Analogy:* This is like taking your freshly written chapter, ripping out the spine of the book, inserting your teammates' new chapters before yours, and then binding it all back together perfectly.
+
+Once you have successfully pushed your branch, you are ready to open a **Pull Request** on GitHub to officially merge your feature!
+
+---
+
+## Advanced Teamwork Scenarios
+
+### 1. Fixing Merge Conflicts
+
+If you and a teammate edited the exact same line of code, Git will pause your `rebase` or `merge` and yell "Conflict!". Git doesn't know whose code is right, so you have to choose.
+
+1. Open the conflicted file in your code editor.
+2. You will see both your code and your teammate's code surrounded by `<<<<<<<` and `>>>>>>>` markers.
+3. Delete the markers and leave only the final code you actually want to keep.
+4. Tell Git you fixed it and continue:
+```bash
+git add .
+git rebase --continue
+```
+* **What this does:** 
+  * `add .` tells Git "I have resolved the conflict in this file."
+  * `rebase --continue` tells Git to resume applying the rest of your commits now that the roadblock is cleared.
+
+### 2. Stashing Unfinished Work
+
+What if your boss tells you to pull the latest code immediately, but you are in the middle of typing a sentence and aren't ready to `commit` your broken code yet? 
+
+Temporarily hide your messy work:
+```bash
+git stash
+```
+* **What this does:** Takes all your unsaved changes and shoves them into a temporary hidden drawer so your folder is completely clean.
+
+Bring your messy work back out:
+```bash
+git stash pop
+```
+* **What this does:** Opens the drawer and dumps your unfinished work back onto your screen so you can finish typing your sentence!
+
+### 3. Opening a Pull Request (PR)
+
+In a professional team, you **never** push your code directly into the `main` branch. 
+
+Instead, after you upload your branch with `git push`, you go to the GitHub website. You will see a green button that says **"Compare & pull request"**. 
+
+Clicking this button allows you to ask your teammates: *"Can you please pull my new feature into the main branch?"* They will review your code, leave comments, and eventually click "Merge" to combine your work with the rest of the company's app!

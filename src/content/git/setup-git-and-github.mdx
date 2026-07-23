@@ -1,0 +1,38 @@
+---
+title: "Setup Git & GitHub"
+description: "Install Git and connect it to your GitHub account."
+category: "Getting Started"
+difficulty: "Beginner"
+tags: ["install","setup","config","ssh"]
+order: 3
+---
+
+Before you can start writing code, you need to install Git on your computer and connect it to your GitHub account.
+
+## 1. Install Git
+
+* **Windows:** Download the installer from [git-scm.com](https://git-scm.com/download/win) and click through the default options.
+* **Mac:** Open your terminal and type `git --version`. If it is not installed, your Mac will automatically prompt you to install it.
+* **Linux:** Open your terminal and run `sudo apt install git`.
+
+## 2. Configure Your Identity
+
+Once Git is installed, you need to tell it who you are. This name and email will be permanently attached to every save (commit) you make.
+
+Open your terminal and run:
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+```
+
+## 3. Create a GitHub Account
+
+Go to [github.com](https://github.com) and sign up for a free account. Use the exact same email address you just configured in your terminal above!
+
+## 4. Connect Them Together
+
+When you try to run your very first `git push` command to upload code, a pop-up window will automatically appear on your screen asking you to **"Sign in with your browser"**.
+
+Simply click that button, log into GitHub in your web browser, and you are done!
+
+You are now fully set up and ready to start coding!

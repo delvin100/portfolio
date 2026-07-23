@@ -1,0 +1,22 @@
+---
+title: "git revert"
+description: "Revert some existing commits safely."
+category: "Undo Changes"
+difficulty: "Advanced"
+tags: ["revert","undo","safe"]
+order: 3
+---
+
+The `git revert` command is a safe way to undo a previous commit. 
+
+Instead of deleting the bad commit from history (which is dangerous if you've already pushed it to GitHub), `git revert` creates a **brand new commit** that does the exact opposite of the bad commit.
+
+## Common Usage
+
+### Revert a specific commit
+```bash
+git revert <commit-hash>
+```
+Git will figure out exactly what changes were made in `<commit-hash>` and create a new commit that undoes all of them.
+
+> Always use `git revert` instead of `git reset` if you are trying to undo code that has already been shared with your team on GitHub!

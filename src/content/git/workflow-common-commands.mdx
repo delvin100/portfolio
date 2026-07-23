@@ -1,0 +1,110 @@
+---
+title: "Common Git Workflows"
+description: "A quick reference guide for daily Git command sequences."
+category: "Workflows"
+difficulty: "Beginner"
+tags: ["workflow","commands","reference"]
+order: 2
+---
+
+
+## Push Code Next Time
+
+Use this routine every time you make changes to your existing code and want to back them up to GitHub.
+
+Stage updated files:
+```bash
+git add .
+```
+* **What this does:** 
+  * `add` tells Git to look at all the files you've changed. 
+  * The `.` (period) is a shortcut that means "everything in this folder". 
+  * *Analogy:* Imagine you are packing for a trip. `git add .` is like gathering all your clothes and placing them neatly into your suitcase, getting them ready to be packed.
+
+Save new changes:
+```bash
+git commit -m "second commit"
+```
+* **What this does:** 
+  * `commit` permanently saves a snapshot of the files you just added. 
+  * `-m "second commit"` attaches a sticky note to this save so you can remember what you changed. 
+  * *Analogy:* This is like finally zipping up your suitcase and slapping a label on it that says "Summer Clothes". Your changes are now safely packed!
+
+Push updates to GitHub:
+```bash
+git push origin main
+```
+* **What this does:** 
+  * `push` literally "pushes" (uploads) your saved suitcases (commits) up to the internet (GitHub).
+  * `origin main` means "send this to the main branch on the remote server we nicknamed origin". 
+
+---
+
+## Force Push (Use Carefully)
+
+Use this **only** if you need to deliberately overwrite the remote repository with your local changes (e.g., after rebasing or resetting).
+
+Overwrite remote history:
+```bash
+git push origin main --force
+```
+* **What this does:** 
+  * This uploads your local code, but the `--force` flag tells GitHub: *"I don't care what you currently have saved. Delete it, and replace it entirely with what I am giving you right now."* 
+  * **Warning:** This is dangerous! If your teammates pushed code to GitHub, this command will delete their code permanently. Only use this on your own personal branches.
+
+---
+
+## When Push Is Rejected
+
+This happens when a teammate has pushed code to GitHub before you. You must download their changes and merge them with yours before you can push.
+
+Fetch latest changes from remote:
+```bash
+git fetch origin
+```
+* **What this does:** 
+  * `fetch` tells Git to go to GitHub and download the newest history of what your teammates have been doing, but it **does not** touch your actual files yet. It just looks at the changes.
+
+Rebase your local changes on top of the latest code:
+```bash
+git pull origin main --rebase
+```
+* **What this does:** 
+  * `pull` downloads your teammates' code.
+  * `--rebase` is a special trick. It says: *"Take the work I just did, temporarily set it aside, apply my teammates' new code first, and then magically apply my work on top of theirs."* This keeps the project history looking like one straight, clean line.
+
+Stage resolved files (if there were merge conflicts):
+```bash
+git add .
+```
+* **What this does:** 
+  * Sometimes, you and a teammate edit the exact same line of code. Git doesn't know who is right! This is called a "conflict". 
+  * You have to open the file and fix it manually. Once you fix it, `git add .` tells Git, *"Okay, I fixed the issue, you can pack this file up now."*
+
+Continue rebase after fixing conflicts:
+```bash
+git rebase --continue
+```
+* **What this does:** 
+  * This tells Git: *"I have fixed the conflicts, please continue applying the rest of my saved commits."*
+
+Push successfully after rebase:
+```bash
+git push origin main
+```
+* **What this does:** 
+  * Now that you have successfully merged your teammates' code with your code, GitHub will accept your upload without rejecting it!
+
+---
+
+## View Commit History
+
+Use this to quickly see what has happened in your project's timeline.
+
+Show all commits in short format:
+```bash
+git log --oneline
+```
+* **What this does:** 
+  * `log` prints out a list of every single commit (save) that has ever happened in this project.
+  * `--oneline` formats the list so that each save only takes up one line of text, making it much easier to read and skim through.

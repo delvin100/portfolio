@@ -22,7 +22,7 @@ export default function GitLandingPage() {
           Git Learning Hub
         </h1>
         <p className="text-xl text-muted-foreground">
-          Everything you need to master Git, GitHub, GitLab, and version control best practices. From first commit to advanced workflows.
+          Everything you need to master Git, GitHub and version control best practices. From first commit to advanced workflows.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-6">
           <Link href="/git/what-is-git" className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
@@ -54,56 +54,56 @@ export default function GitLandingPage() {
         </Link>
 
         <Link
-          href="/git/git-status"
+          href="/git/workflow-first-repo"
           className="group relative rounded-lg border border-border bg-card p-6 hover:bg-muted/50 transition-colors"
         >
           <div className="flex items-center gap-4">
             <div className="rounded-md bg-primary/10 p-2 text-primary">
               <Terminal className="h-6 w-6" />
             </div>
-            <h3 className="font-semibold">Basic Commands</h3>
+            <h3 className="font-semibold">Workflows</h3>
           </div>
           <p className="mt-2 text-sm text-muted-foreground">
-            Master the core commands you'll use every day like status, add, and commit.
+            Step-by-step guides for creating repos, collaborating, and solving common scenarios.
           </p>
           <div className="mt-4 flex items-center text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-            View Commands <ArrowRight className="ml-1 h-4 w-4" />
+            View Workflows <ArrowRight className="ml-1 h-4 w-4" />
           </div>
         </Link>
         
         <Link
-          href="/git/github-overview"
+          href="/git/git-branch"
           className="group relative rounded-lg border border-border bg-card p-6 hover:bg-muted/50 transition-colors"
         >
           <div className="flex items-center gap-4">
             <div className="rounded-md bg-primary/10 p-2 text-primary">
-              <GithubIcon className="h-6 w-6" />
+              <GitBranch className="h-6 w-6" />
             </div>
-            <h3 className="font-semibold">GitHub & GitLab</h3>
+            <h3 className="font-semibold">Branches</h3>
           </div>
           <p className="mt-2 text-sm text-muted-foreground">
-            Explore Pull Requests, Issues, Actions, and team collaboration.
+            Learn how to safely branch your code, work in isolation, and merge features together.
           </p>
           <div className="mt-4 flex items-center text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-            Explore Platforms <ArrowRight className="ml-1 h-4 w-4" />
+            Explore Branches <ArrowRight className="ml-1 h-4 w-4" />
           </div>
         </Link>
         
         <Link
-          href="/git/troubleshooting"
+          href="/git/git-restore"
           className="group relative rounded-lg border border-border bg-card p-6 hover:bg-muted/50 transition-colors"
         >
           <div className="flex items-center gap-4">
             <div className="rounded-md bg-primary/10 p-2 text-primary">
               <ShieldAlert className="h-6 w-6" />
             </div>
-            <h3 className="font-semibold">Troubleshooting</h3>
+            <h3 className="font-semibold">Undo Changes</h3>
           </div>
           <p className="mt-2 text-sm text-muted-foreground">
-            How to fix common mistakes, recover deleted commits, and resolve conflicts.
+            How to safely undo mistakes, restore files, and revert bad commits.
           </p>
           <div className="mt-4 flex items-center text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-            Fix Issues <ArrowRight className="ml-1 h-4 w-4" />
+            Undo Mistakes <ArrowRight className="ml-1 h-4 w-4" />
           </div>
         </Link>
       </div>

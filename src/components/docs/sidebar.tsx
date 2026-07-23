@@ -37,7 +37,7 @@ export function Sidebar({ navItems }: SidebarProps) {
   return (
     <div 
       className={cn(
-        "w-full h-full py-6 pr-6 overflow-y-auto custom-scrollbar",
+        "w-full h-full py-6 pr-6 overflow-y-auto overscroll-contain custom-scrollbar",
         isScrolling ? "is-scrolling" : ""
       )}
       onScroll={handleScroll}

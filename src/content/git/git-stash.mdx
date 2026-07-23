@@ -1,0 +1,31 @@
+---
+title: "git stash"
+description: "Stash the changes in a dirty working directory away."
+category: "Stash"
+difficulty: "Intermediate"
+tags: ["stash","hide","temporary"]
+---
+
+The `git stash` command temporarily shelves (or stashes) changes you've made to your working copy so you can work on something else, and then come back and re-apply them later on.
+
+This is incredibly useful when you need to switch branches or pull new code, but your current files are messy and you aren't ready to commit them yet.
+
+## Common Usage
+
+### Stash your changes
+```bash
+git stash
+```
+Takes all your modified tracked files and hides them in a temporary drawer, returning your folder to a clean state.
+
+### Retrieve your stashed changes
+```bash
+git stash pop
+```
+Takes the changes out of the hidden drawer and applies them back to your current working files, then deletes the stash.
+
+### View your stashes
+```bash
+git stash list
+```
+Shows a list of all the stashes you currently have saved.
