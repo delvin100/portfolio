@@ -17,24 +17,28 @@ Navigate to your project folder in the terminal and run:
 ```bash
 git init
 ```
+* **What this does:** This command tells Git to start tracking the current folder. It creates a hidden `.git` folder inside your project where all the version history will be stored. Without this, Git won't track any of your files.
 
 ## 2. Add Your Files
 Stage all your project files:
 ```bash
 git add .
 ```
+* **What this does:** The `add` command tells Git to prepare files to be saved. The period (`.`) at the end is a shortcut that means "add every single file and folder in the current directory." Think of this as putting your files into a moving box before you tape it shut.
 
 ## 3. Make Your First Commit
 Save your snapshot:
 ```bash
 git commit -m "Initial commit"
 ```
+* **What this does:** This command permanently saves the snapshot of the files you just added. The `-m` flag allows you to attach a message (in this case, `"Initial commit"`) to describe what this save contains. 
 
 ## 4. Link to GitHub
 Create a blank repository on GitHub, then copy the remote URL and link it:
 ```bash
 git remote add origin https://github.com/your-username/your-repo.git
 ```
+* **What this does:** This links your local folder to the blank project you created on GitHub's servers. We are giving the URL the nickname `origin`. From now on, when you talk to `origin`, Git knows you mean this specific GitHub URL.
 
 ## 5. Push to GitHub
 Push your code up to the remote server:
@@ -42,6 +46,9 @@ Push your code up to the remote server:
 git branch -M main
 git push -u origin main
 ```
+* **What this does:** 
+  * `git branch -M main`: The `-M` flag forces a rename of your current default branch (which might be called `master`) to `main`. This is the modern standard naming convention for GitHub.
+  * `git push -u origin main`: The `push` command uploads your code to GitHub (`origin`). The `-u` flag stands for "upstream". It tells Git to remember this connection so that in the future, you can simply type `git push` without having to type out `origin main` every single time!
 
 Congratulations! Your code is now live on GitHub.
 
