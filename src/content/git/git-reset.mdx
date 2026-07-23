@@ -1,0 +1,30 @@
+---
+title: "git reset"
+description: "Reset current HEAD to the specified state."
+category: "Undo Changes"
+difficulty: "Advanced"
+tags: ["reset","undo","history"]
+order: 1
+---
+
+
+The `git reset` command is a complex and versatile tool for undoing changes. It can alter the commit history, the staging area, and the working directory.
+
+## Modes
+
+1. **--soft**: Moves HEAD to the specified commit. Leaves staging and working directory unchanged.
+2. **--mixed** (Default): Moves HEAD, resets staging area, leaves working directory unchanged.
+3. **--hard**: Moves HEAD, resets staging area, and deletes all changes in working directory.
+
+## Examples
+
+**Undo the last commit (keep changes)**
+```bash
+git reset --soft HEAD~1
+```
+
+**Completely wipe out uncommitted changes**
+```bash
+git reset --hard
+```
+

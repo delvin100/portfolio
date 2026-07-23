@@ -1,0 +1,32 @@
+---
+title: "git checkout"
+description: "Switch branches or restore working tree files."
+category: "Branch"
+difficulty: "Intermediate"
+tags: ["checkout","switch","restore"]
+order: 2
+---
+
+
+The `git checkout` command operates upon three distinct entities: files, commits, and branches. 
+
+> [!NOTE]
+> In modern Git (>= 2.23), `git checkout` has been split into two safer commands: `git switch` (for changing branches) and `git restore` (for reverting files).
+
+## Examples
+
+**Switch branches**
+```bash
+git checkout feature-branch
+```
+
+**Create and switch to a new branch**
+```bash
+git checkout -b new-feature
+```
+
+**Discard changes in a file**
+```bash
+git checkout -- index.html
+```
+

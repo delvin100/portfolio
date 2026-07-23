@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @plugin "tailwindcss-animate";
-
+@plugin "@tailwindcss/typography";
 :root {
   /* Light mode colors */
   --primary: oklch(0.6 0.15 260); /* Blue */
@@ -221,19 +221,23 @@
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
 }
 
-/* Custom Scrollbar */
+/* Custom Auto-Hiding Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: transparent;
   border-radius: 4px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+.custom-scrollbar.is-scrolling::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--foreground) 20%, transparent);
+}
+.custom-scrollbar.is-scrolling::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--foreground) 40%, transparent);
 }
 
 @theme inline {

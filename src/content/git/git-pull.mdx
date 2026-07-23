@@ -1,0 +1,32 @@
+---
+title: "git pull"
+description: "Fetch from and integrate with another repository or a local branch."
+category: "Remote"
+difficulty: "Beginner"
+tags: ["pull","download","remote","sync"]
+order: 2
+---
+
+
+The `git pull` command is used to fetch and download content from a remote repository and immediately update the local repository to match that content.
+
+## Why Use It
+
+To keep your local code up to date with changes your teammates have pushed to the remote repository.
+
+## Syntax
+
+```bash
+git pull <remote> <branch>
+```
+
+## Examples
+
+**Pull latest changes**
+```bash
+git pull origin main
+```
+
+> [!TIP]
+> `git pull` is actually a combination of two commands: `git fetch` followed by `git merge`.
+

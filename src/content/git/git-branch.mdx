@@ -1,0 +1,41 @@
+---
+title: "git branch"
+description: "List, create, or delete branches."
+category: "Branch"
+difficulty: "Beginner"
+tags: ["branch","create","delete","list"]
+order: 1
+---
+
+
+The `git branch` command lets you create, list, rename, and delete branches.
+
+## Why Use It
+
+Branching is Git's "killer feature". It allows you to diverge from the main line of development and continue to do work without messing with that main line.
+
+<GitGraphVisualizer scenario="branching" />
+
+## Syntax
+
+```bash
+git branch [branch-name]
+```
+
+## Examples
+
+**List all local branches**
+```bash
+git branch
+```
+
+**Create a new branch**
+```bash
+git branch feature-login
+```
+
+**Delete a branch**
+```bash
+git branch -d feature-login
+```
+

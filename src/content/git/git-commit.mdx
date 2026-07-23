@@ -1,0 +1,84 @@
+---
+title: "git commit"
+description: "Record changes to the repository"
+category: "Commit"
+difficulty: "Beginner"
+tags: ["commit", "history", "save"]
+order: 1
+---
+
+# git commit
+
+## Description
+
+The `git commit` command captures a snapshot of the project's currently staged changes. Committed snapshots can be thought of as "safe" versions of a project—Git will never change them unless you explicitly ask it to.
+
+## Why Use It
+
+Committing is how you save your work in Git. Each commit creates a point in your project's history that you can go back to if you find a bug or make a mistake.
+
+## Syntax
+
+```bash
+git commit -m "commit message"
+```
+
+## Parameters
+
+- `-m <msg>`, `--message=<msg>`
+  Use the given `<msg>` as the commit message. If multiple `-m` options are given, their values are concatenated as separate paragraphs.
+
+- `-a`, `--all`
+  Automatically stage files that have been modified and deleted, but new files you have not told Git about are not affected.
+
+- `--amend`
+  Replace the tip of the current branch by creating a new commit. Used to fix a mistake in the last commit (like a typo in the message or forgetting a file).
+
+## Examples
+
+**Standard Commit**
+First, stage files with `git add`, then commit:
+```bash
+git commit -m "Add authentication feature"
+```
+
+**Stage and Commit in One Command**
+Only works for tracked files (not brand new files):
+```bash
+git commit -am "Fix typo in login screen"
+```
+
+**Amend the Last Commit**
+If you forgot to add a file, stage it, then run:
+```bash
+git commit --amend --no-edit
+```
+
+## Example Output
+
+```text
+[main 7ebec89] Add authentication feature
+ 2 files changed, 45 insertions(+), 2 deletions(-)
+ create mode 100644 src/auth.ts
+```
+
+## Common Use Cases
+
+- Saving completed units of work.
+- Checkpointing progress on a complex feature.
+
+## Common Mistakes
+
+- **Writing terrible commit messages:** Messages like "fix" or "update" are useless when looking back at history. A good commit message describes *why* a change was made.
+- **Committing too much at once:** Try to keep commits focused on a single logical change.
+
+## Tips
+
+> [!IMPORTANT]
+> Good commit messages start with a capitalized, imperative verb (e.g., "Add", "Fix", "Update") and are concise but descriptive.
+
+## Related Commands
+
+- `git add`
+- `git status`
+- `git log`

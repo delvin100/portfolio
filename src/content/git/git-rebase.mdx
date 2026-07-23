@@ -1,0 +1,33 @@
+---
+title: "git rebase"
+description: "Reapply commits on top of another base tip."
+category: "Rebase"
+difficulty: "Advanced"
+tags: ["rebase","history","clean"]
+order: 1
+---
+
+
+Rebasing is the process of moving or combining a sequence of commits to a new base commit.
+
+## Why Use It
+
+Rebasing creates a perfectly linear project history. Instead of seeing a messy web of merge commits, your history looks like all work happened sequentially.
+
+## Syntax
+
+```bash
+git rebase <base-branch>
+```
+
+## Examples
+
+**Rebase feature onto main**
+```bash
+git checkout feature-login
+git rebase main
+```
+
+> [!WARNING]
+> The Golden Rule of Rebasing: Never rebase commits that have been pushed to a shared public repository! It rewrites history and will break your teammates' local repositories.
+

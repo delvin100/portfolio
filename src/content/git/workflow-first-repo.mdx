@@ -1,0 +1,47 @@
+---
+title: "Initialize and Push First Repo"
+description: "Step by step guide to creating your first repository and pushing it to GitHub."
+category: "Workflows"
+difficulty: "Beginner"
+tags: ["workflow","init","push","github"]
+order: 1
+---
+
+
+# Creating Your First Repository
+
+This workflow guides you through taking a local folder on your computer and pushing it to GitHub.
+
+## 1. Initialize the Repository
+Navigate to your project folder in the terminal and run:
+```bash
+git init
+```
+
+## 2. Add Your Files
+Stage all your project files:
+```bash
+git add .
+```
+
+## 3. Make Your First Commit
+Save your snapshot:
+```bash
+git commit -m "Initial commit"
+```
+
+## 4. Link to GitHub
+Create a blank repository on GitHub, then copy the remote URL and link it:
+```bash
+git remote add origin https://github.com/your-username/your-repo.git
+```
+
+## 5. Push to GitHub
+Push your code up to the remote server:
+```bash
+git branch -M main
+git push -u origin main
+```
+
+Congratulations! Your code is now live on GitHub.
+

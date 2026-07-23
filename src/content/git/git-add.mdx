@@ -1,0 +1,39 @@
+---
+title: "git add"
+description: "Add file contents to the staging area."
+category: "Basic Commands"
+difficulty: "Beginner"
+tags: ["add","stage","files"]
+order: 2
+---
+
+
+The `git add` command adds a change in the working directory to the staging area.
+
+## Why Use It
+
+Before you can commit a change, you must "stage" it. This allows you to group related changes together into a single commit, rather than committing every changed file at once.
+
+## Syntax
+
+```bash
+git add <file>
+```
+
+## Parameters
+
+- `.` or `-A`: Add all new, modified, and deleted files.
+- `-p`, `--patch`: Interactively choose which chunks of a file to stage.
+
+## Examples
+
+**Stage a specific file**
+```bash
+git add index.html
+```
+
+**Stage everything**
+```bash
+git add .
+```
+

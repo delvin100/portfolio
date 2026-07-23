@@ -1,0 +1,39 @@
+---
+title: "git merge"
+description: "Join two or more development histories together."
+category: "Merge"
+difficulty: "Intermediate"
+tags: ["merge","combine","branches"]
+order: 1
+---
+
+
+The `git merge` command integrates the independent lines of development created by `git branch` into a single branch.
+
+## Why Use It
+
+When you finish a feature on a separate branch, you need to bring that code back into the `main` branch.
+
+<GitGraphVisualizer scenario="merge" />
+
+## Syntax
+
+```bash
+git merge <branch>
+```
+
+## Examples
+
+**Merge a feature into main**
+First, switch to the receiving branch:
+```bash
+git checkout main
+```
+Then merge the feature branch:
+```bash
+git merge feature-login
+```
+
+## Common Mistakes
+Merge conflicts happen when two branches modify the exact same lines of a file. Git will pause the merge and ask you to resolve the conflicts manually.
+

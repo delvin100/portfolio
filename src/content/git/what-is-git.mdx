@@ -1,0 +1,41 @@
+---
+title: "What is Git?"
+description: "An introduction to Git and version control."
+category: "Getting Started"
+difficulty: "Beginner"
+tags: ["introduction", "basics", "version control"]
+order: 1
+---
+
+# What is Git?
+
+Git is a free and open source **distributed version control system** designed to handle everything from small to very large projects with speed and efficiency.
+
+## Why Use Git?
+
+- **Track Changes:** Keep a history of every change made to your files.
+- **Collaboration:** Work with other developers simultaneously without overwriting each other's work.
+- **Branching & Merging:** Create isolated environments (branches) to test features, then merge them back securely.
+- **Safety:** If you break something, you can always revert to a previous working state.
+
+## Version Control
+
+Version control systems (VCS) record changes to a file or set of files over time so that you can recall specific versions later. 
+
+Git takes a "snapshot" of your files every time you commit. If a file has not changed, Git simply links to the previous identical file it has already stored.
+
+> [!TIP]
+> Think of Git as a "save game" feature for your code. You can always go back to an earlier save if things go wrong.
+
+## Git Architecture
+
+Git has three main states that your files can reside in:
+
+1. **Modified:** You have changed the file but have not committed it to your database yet.
+2. **Staged:** You have marked a modified file in its current version to go into your next commit snapshot.
+3. **Committed:** The data is safely stored in your local database.
+
+This leads to the three main sections of a Git project:
+- **Working Tree:** The single checkout of one version of the project.
+- **Staging Area (Index):** A file that stores information about what will go into your next commit.
+- **Git Directory (.git):** Where Git stores the metadata and object database for your project.
