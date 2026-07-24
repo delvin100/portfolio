@@ -39,7 +39,7 @@ export function ExperienceSection({ experiences }: { experiences: Experience[] }
               className="inline-block mt-4 text-xl md:text-2xl text-blue-400/90 -rotate-2 drop-shadow-md tracking-wide"
               style={{ fontFamily: 'var(--font-caveat), cursive' }}
             >
-              where I've been leveling up irl.
+              Learning beyond the classroom.
             </span>
           } 
         />

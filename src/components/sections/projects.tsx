@@ -92,7 +92,7 @@ export function ProjectsSection({ projects }: { projects: Project[] }) {
               className="inline-block mt-4 text-xl md:text-2xl text-blue-400/90 -rotate-2 drop-shadow-md tracking-wide"
               style={{ fontFamily: 'var(--font-caveat), cursive' }}
             >
-              what I've been cooking lately fr.
+              Projects that showcase my technical journey.
             </span>
           } 
         />

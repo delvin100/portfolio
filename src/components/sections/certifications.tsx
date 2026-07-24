@@ -98,7 +98,7 @@ export function CertificationsSection({ certifications }: { certifications?: Cer
               className="inline-block mt-4 text-xl md:text-2xl text-blue-400/90 rotate-2 drop-shadow-md tracking-wide"
               style={{ fontFamily: 'var(--font-caveat), cursive' }}
             >
-              receipts of my skills.
+              A showcase of my achievements and credentials.
             </span>
           } 
         />

@@ -63,12 +63,6 @@ export function Navbar() {
               </li>
             ))}
           </ul>
-          <Link
-            href="/git"
-            className="hidden lg:inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-blue-600/10 text-blue-500 hover:bg-blue-600/20 border border-blue-500/20 h-9 px-4 py-2"
-          >
-            Git Guide
-          </Link>
         </nav>
 
         <div className="flex items-center gap-4 md:hidden">
@@ -109,20 +103,6 @@ export function Navbar() {
                   </a>
                 </motion.div>
               ))}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: navLinks.length * 0.1 }}
-                className="mt-4"
-              >
-                <Link
-                  href="/git"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="inline-flex items-center justify-center rounded-md text-lg font-medium transition-colors bg-blue-600 text-white shadow-sm hover:bg-blue-700 h-11 px-8"
-                >
-                  Git Guide
-                </Link>
-              </motion.div>
             </div>
           </motion.div>
         )}

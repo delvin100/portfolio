@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { GitHubCalendar } from "react-github-calendar"
 import { useTheme } from "next-themes"
-import { GitFork, Users, BookOpen, ExternalLink } from "lucide-react"
+import { GitFork, Users, BookOpen, ExternalLink, FileCode, Calendar, Star, Activity } from "lucide-react"
 
 interface GithubStatsProps {
   username: string
@@ -12,12 +12,16 @@ interface GithubStatsProps {
 
 interface GithubUser {
   public_repos: number;
+  public_gists: number;
   followers: number;
   following: number;
   avatar_url: string;
   html_url: string;
   name: string;
   login: string;
+  created_at: string;
+  total_stars?: number;
+  recent_commits?: number;
 }
 
 export function GithubStats({ username }: GithubStatsProps) {
@@ -35,6 +39,26 @@ export function GithubStats({ username }: GithubStatsProps) {
         if (!res.ok) return
         const data = await res.json()
         if (!data.message) {
+          
+          try {
+            const eventsRes = await fetch(`https://api.github.com/users/${username}/events?per_page=100`)
+            if (eventsRes.ok) {
+              const eventsData = await eventsRes.json()
+              const thirtyDaysAgo = new Date()
+              thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+              
+              const recentActivity = eventsData.reduce((acc: number, event: any) => {
+                if (new Date(event.created_at) >= thirtyDaysAgo) {
+                  return acc + 1
+                }
+                return acc
+              }, 0)
+              data.recent_commits = recentActivity
+            }
+          } catch (e) {
+            data.recent_commits = 0
+          }
+
           setUserData(data)
         }
       } catch (err) {
@@ -98,7 +122,7 @@ export function GithubStats({ username }: GithubStatsProps) {
       </motion.div>
 
       {/* Stats Bento Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
         {/* Repos Card */}
         <motion.div variants={itemVariants} className="glass-card p-6 rounded-2xl flex items-center justify-between gap-4 group hover:border-blue-500/30 transition-all cursor-default">
           <div>
@@ -110,6 +134,19 @@ export function GithubStats({ username }: GithubStatsProps) {
           </div>
         </motion.div>
 
+        {/* Commits Card */}
+        <motion.div variants={itemVariants} className="glass-card p-6 rounded-2xl flex items-center justify-between gap-4 group hover:border-amber-500/30 transition-all cursor-default">
+          <div>
+            <p className="text-sm text-slate-400 font-medium mb-1">Commits (30d)</p>
+            <p className="text-3xl font-bold text-slate-100 group-hover:text-amber-400 transition-colors">
+              {userData?.recent_commits !== undefined ? userData.recent_commits : "-"}
+            </p>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Activity size={24} />
+          </div>
+        </motion.div>
+
         {/* Followers Card */}
         <motion.div variants={itemVariants} className="glass-card p-6 rounded-2xl flex items-center justify-between gap-4 group hover:border-green-500/30 transition-all cursor-default">
           <div>
@@ -118,17 +155,6 @@ export function GithubStats({ username }: GithubStatsProps) {
           </div>
           <div className="w-12 h-12 rounded-full bg-green-500/10 text-green-400 flex items-center justify-center group-hover:scale-110 transition-transform">
             <Users size={24} />
-          </div>
-        </motion.div>
-
-        {/* Following Card */}
-        <motion.div variants={itemVariants} className="glass-card p-6 rounded-2xl flex items-center justify-between gap-4 group hover:border-purple-500/30 transition-all cursor-default">
-          <div>
-            <p className="text-sm text-slate-400 font-medium mb-1">Following</p>
-            <p className="text-3xl font-bold text-slate-100 group-hover:text-purple-400 transition-colors">{userData?.following || "-"}</p>
-          </div>
-          <div className="w-12 h-12 rounded-full bg-purple-500/10 text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-            <GitFork size={24} />
           </div>
         </motion.div>
       </div>

@@ -125,7 +125,7 @@ export function SkillsSection({ skills, categories }: { skills: Skill[], categor
               className="inline-block mt-4 text-xl md:text-2xl text-blue-400/90 -rotate-2 drop-shadow-md tracking-wide"
               style={{ fontFamily: 'var(--font-caveat), cursive' }}
             >
-              the tools I use to cook fr.
+              The tools behind my projects.
             </span>
           } 
           centered 

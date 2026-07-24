@@ -14,7 +14,7 @@ export function OpenSourceSection() {
               className="inline-block mt-4 text-xl md:text-2xl text-blue-400/90 rotate-1 drop-shadow-md tracking-wide"
               style={{ fontFamily: 'var(--font-caveat), cursive' }}
             >
-              building and contributing in the open.
+              Building and contributing in the open.
             </span>
           }
           centered
