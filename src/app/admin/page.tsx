@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/server'
-import { Briefcase, Code, FileText, Eye, Users } from 'lucide-react'
+import { Briefcase, Code, FileText, Eye, Users, Award } from 'lucide-react'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
@@ -12,13 +12,16 @@ async function getStats() {
     { count: projectsCount },
     { count: skillsCount },
     { count: expCount },
+    { count: certsCount },
     usersCount,
     pageViewsCount,
   ] = await Promise.all([
     supabase.from('projects').select('*', { count: 'exact', head: true }),
     supabase.from('skills').select('*', { count: 'exact', head: true }),
     supabase.from('experience').select('*', { count: 'exact', head: true }),
+    supabase.from('certifications').select('*', { count: 'exact', head: true }),
     prisma.user.count(),
+    // @ts-ignore - Prisma client needs regeneration
     prisma.pageView.count(),
   ])
 
@@ -26,6 +29,7 @@ async function getStats() {
     projects: projectsCount || 0,
     skills: skillsCount || 0,
     experience: expCount || 0,
+    certifications: certsCount || 0,
     users: usersCount || 0,
     views: pageViewsCount || 0,
   }
@@ -38,8 +42,9 @@ export default async function AdminOverviewPage() {
     { title: 'Total Projects', value: stats.projects, icon: Briefcase, color: 'text-blue-400', href: '/admin/projects' },
     { title: 'Experience Roles', value: stats.experience, icon: FileText, color: 'text-amber-400', href: '/admin/experience' },
     { title: 'Skills Tracked', value: stats.skills, icon: Code, color: 'text-emerald-400', href: '/admin/skills' },
+    { title: 'Certifications', value: stats.certifications, icon: Award, color: 'text-rose-400', href: '/admin/certifications' },
     { title: 'Registered Users', value: stats.users, icon: Users, color: 'text-purple-400', href: '/admin/users' },
-    { title: 'Portfolio Views', value: stats.views, icon: Eye, color: 'text-indigo-400', href: '/admin' },
+    { title: 'Portfolio Views', value: stats.views, icon: Eye, color: 'text-indigo-400', href: '/admin/settings#analytics' },
   ]
 
   return (

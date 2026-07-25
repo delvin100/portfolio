@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react'
 import { uploadSettingFile, updateSetting, getSettings } from '@/app/actions/portfolio'
 import { updateAccountEmail, updateAccountPassword, getCurrentUser } from '@/app/actions/auth'
+import { clearPageViews } from '@/app/actions/admin'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { Loader2, Upload, Link as LinkIcon, FileImage, FileText, CheckCircle2, Lock, Mail, Key, Eye, EyeOff } from 'lucide-react'
+import { Loader2, Upload, Link as LinkIcon, FileImage, FileText, CheckCircle2, Lock, Mail, Key, Eye, EyeOff, BarChart2, Trash2 } from 'lucide-react'
 
 type InputMode = 'upload' | 'url'
 
@@ -20,6 +22,8 @@ export default function SettingsPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [currentEmail, setCurrentEmail] = useState<string | null>(null)
+  const [isClearingViews, setIsClearingViews] = useState(false)
+  const [isClearViewsDialogOpen, setIsClearViewsDialogOpen] = useState(false)
   
   const [resumeMode, setResumeMode] = useState<InputMode>('upload')
   const [profileMode, setProfileMode] = useState<InputMode>('upload')
@@ -134,6 +138,23 @@ export default function SettingsPage() {
       toast.error(error.message)
     } finally {
       setIsUpdatingPassword(false)
+    }
+  }
+
+  const handleClearViews = async () => {
+    setIsClearingViews(true)
+    try {
+      const result = await clearPageViews()
+      if (result?.error) {
+        toast.error(result.error)
+      } else {
+        toast.success('Analytics data cleared successfully!')
+        setIsClearViewsDialogOpen(false)
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to clear analytics')
+    } finally {
+      setIsClearingViews(false)
     }
   }
 
@@ -508,7 +529,86 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
+        {/* Analytics Card */}
+        <Card id="analytics" className="relative border-muted/30 shadow-xl shadow-black/5 bg-surface/40 backdrop-blur-sm overflow-hidden group mt-1 lg:col-span-2">
+          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-400 transform origin-left transition-transform group-hover:scale-x-100" />
+          <CardHeader className="pb-4 pt-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-indigo-500/10 rounded-xl">
+                <BarChart2 className="w-6 h-6 text-indigo-500" />
+              </div>
+              <div>
+                <CardTitle className="text-xl">Analytics & Metrics</CardTitle>
+                <CardDescription className="mt-1">
+                  Manage data related to profile visits.
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="p-6 bg-black/20 border border-white/5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <h3 className="font-semibold text-white mb-1">Clear Profile Views</h3>
+                <p className="text-sm text-slate-400">
+                  Reset the portfolio views counter to zero. This will permanently delete all logged page views from the database.
+                </p>
+              </div>
+              <Button 
+                onClick={() => setIsClearViewsDialogOpen(true)} 
+                disabled={isClearingViews}
+                variant="destructive"
+                className="w-full sm:w-auto bg-[#f43f5e] hover:bg-[#e11d48] text-white font-medium whitespace-nowrap"
+              >
+                {isClearingViews ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Clearing...</>
+                ) : (
+                  <><Trash2 className="mr-2 h-4 w-4" /> Clear Views Data</>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
       </div>
+      
+      {/* Custom Confirmation Dialog */}
+      <Dialog open={isClearViewsDialogOpen} onOpenChange={setIsClearViewsDialogOpen}>
+        <DialogContent className="sm:max-w-[425px] bg-slate-950 border-slate-800 text-white shadow-2xl shadow-rose-500/10">
+          <DialogHeader>
+            <DialogTitle className="text-xl flex items-center gap-2 text-rose-500">
+              <Trash2 className="w-5 h-5" />
+              Clear Profile Views?
+            </DialogTitle>
+            <DialogDescription className="text-slate-400 pt-2 text-base">
+              Are you absolutely sure you want to clear all profile views? This will permanently delete all logged page views from the database. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4 border-t-0 bg-transparent gap-2 sm:gap-0">
+            <Button 
+              type="button" 
+              variant="ghost" 
+              className="hover:bg-white/5 text-slate-300"
+              onClick={() => setIsClearViewsDialogOpen(false)}
+              disabled={isClearingViews}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="button" 
+              variant="destructive" 
+              className="bg-rose-500 hover:bg-rose-600 text-white font-medium"
+              onClick={handleClearViews}
+              disabled={isClearingViews}
+            >
+              {isClearingViews ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Clearing...</>
+              ) : (
+                <>Yes, Clear Data</>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

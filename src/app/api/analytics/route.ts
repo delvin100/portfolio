@@ -20,6 +20,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, ignored: true })
     }
 
+    // @ts-ignore - Prisma client needs regeneration
     await prisma.pageView.create({
       data: {
         path,

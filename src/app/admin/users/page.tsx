@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { prisma } from '@/lib/prisma'
 import { DeleteUserButton } from './delete-user-button'
+import { EditUserButton } from './edit-user-button'
 
 export default async function AdminUsersPage() {
   const users = await prisma.user.findMany({
@@ -53,7 +54,10 @@ export default async function AdminUsersPage() {
                       {new Date(user.createdAt).toLocaleDateString('en-GB')}
                     </TableCell>
                     <TableCell className="text-center">
-                      <DeleteUserButton userId={user.id} userName={user.name} />
+                      <div className="flex items-center justify-center gap-2">
+                        <EditUserButton userId={user.id} initialName={user.name} initialUsername={user.username} />
+                        <DeleteUserButton userId={user.id} userName={user.name} />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

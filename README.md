@@ -17,7 +17,6 @@ This Developer Portfolio is a comprehensive, dynamic web application designed to
 - 📚 Integrated Git Learning Hub with MDX documentation & visual graphs
 - 🛠️ Categorized Skills showcase with visual icons
 - 💬 Real-time Chat/Messaging system for visitors
-- 🌙 Dark and Light mode support (next-themes)
 - 🔐 Secure data management with Supabase and Prisma
 - 📊 Fully manageable content via PostgreSQL database
 - ⚡ Server-Side Rendering (SSR) for optimal performance and SEO
