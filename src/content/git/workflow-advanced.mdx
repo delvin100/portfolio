@@ -1,0 +1,65 @@
+---
+title: "Advanced Workflows"
+description: "Handle interactive rebasing, squashing commits, and complex conflicts."
+category: "Workflows"
+difficulty: "Advanced"
+tags: ["workflow","rebase","squash","conflicts"]
+order: 11
+---
+
+Once you've mastered the basic commands, these advanced workflows will help you keep your repository history exceptionally clean and professional.
+
+## Interactive Rebasing (Squashing)
+
+Sometimes while you are developing a feature, you make a lot of small, messy commits ("wip", "fixed typo", "actually fixed it this time"). Before you merge this branch into `main`, you can "squash" these commits down into one single, clean commit using an interactive rebase.
+
+**1. Start the interactive rebase**
+```bash
+git rebase -i HEAD~3
+```
+*This tells Git: "Let me interactively edit the last 3 commits."*
+
+**2. Edit the file**
+Git will open a text editor showing your last 3 commits:
+```text
+pick 3a2b1c0 Added the header
+pick 4f5e6d7 fixed a typo in the header
+pick 7g8h9i0 adjusted header padding
+```
+
+Change the word `pick` to `squash` (or just `s`) for the commits you want to meld into the one above it:
+```text
+pick 3a2b1c0 Added the header
+squash 4f5e6d7 fixed a typo in the header
+squash 7g8h9i0 adjusted header padding
+```
+
+**3. Save and close**
+Git will pause and ask you to write a new commit message for this single, combined commit. Write something clean, save, and close. Your history is now spotless!
+
+---
+
+## Complex Merge Conflicts (Tree Conflicts)
+
+A standard merge conflict happens when two people edit the exact same line of code. A **Tree Conflict** happens when one person edits a file, and the other person **deletes or renames** that exact same file.
+
+Git will pause the merge and say:
+`CONFLICT (modify/delete): index.html deleted in HEAD and modified in branchB.`
+
+**How to resolve it:**
+You have to make a choice. 
+
+If you want to **keep the modifications** (and undelete the file):
+```bash
+git add index.html
+```
+
+If you agree that the file **should be deleted**:
+```bash
+git rm index.html
+```
+
+Once you have made your choice, finish the merge:
+```bash
+git commit
+```

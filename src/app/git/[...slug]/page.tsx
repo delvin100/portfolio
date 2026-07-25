@@ -102,7 +102,7 @@ export default async function DocPage({ params }: DocPageProps) {
       </div>
 
       {/* Right Sidebar - Table of Contents */}
-      <div className="lg:w-64 shrink-0">
+      <div className="hidden lg:block lg:w-64 shrink-0">
         <div className="sticky top-20 text-sm">
           <TableOfContents headings={headings} />
         </div>

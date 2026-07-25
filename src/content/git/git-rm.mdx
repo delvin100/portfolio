@@ -1,0 +1,34 @@
+---
+title: "git rm"
+description: "Remove files from the working tree and from the index."
+category: "Advanced Commands"
+difficulty: "Advanced"
+tags: ["remove","delete","untrack","files"]
+order: 2
+---
+
+The `git rm` command removes files from your Git repository. It deletes them from your working directory (your file system) and stages the removal for the next commit.
+
+## Why Use It
+
+If you simply delete a file using your operating system, Git will notice it's missing but won't automatically stage the deletion. `git rm` does both steps at once, making sure Git knows you intend to remove the file.
+
+## Syntax
+
+```bash
+git rm <file>
+```
+
+## Examples
+
+**Remove a file permanently**
+```bash
+git rm config.json
+```
+*This deletes the file from your disk and stages the deletion for the next commit.*
+
+**Stop tracking a file without deleting it**
+```bash
+git rm --cached config.json
+```
+*This is very useful if you accidentally committed a file (like a password file or a huge log file) and want Git to stop tracking it, but you still want to keep the file on your local computer. You would typically add it to your `.gitignore` after running this.*

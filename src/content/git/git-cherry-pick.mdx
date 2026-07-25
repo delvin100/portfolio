@@ -1,0 +1,33 @@
+---
+title: "git cherry-pick"
+description: "Apply the changes introduced by some existing commits."
+category: "Advanced Commands"
+difficulty: "Advanced"
+tags: ["cherry-pick","commits","apply"]
+order: 7
+---
+
+The `git cherry-pick` command allows you to choose a commit from one branch and apply it to another. 
+
+## Why Use It
+
+Sometimes you make a commit on the wrong branch, or someone fixes a bug on an experimental branch and you want to pull *just that one bug fix* into your main branch without merging the entire experimental branch. `cherry-pick` copies the changes from the chosen commit and creates a brand new commit on your current branch.
+
+## Syntax
+
+```bash
+git cherry-pick <commit-hash>
+```
+
+## Examples
+
+**Apply a specific commit to your current branch**
+```bash
+git cherry-pick 3e887ab
+```
+
+**What to do if there is a conflict**
+Just like a merge, a cherry-pick can cause a conflict if the code has changed too much. You will need to resolve the conflict manually, `git add` the resolved files, and then run:
+```bash
+git cherry-pick --continue
+```

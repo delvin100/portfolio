@@ -14,6 +14,7 @@ This Developer Portfolio is a comprehensive, dynamic web application designed to
 
 - 🎨 Modern, responsive, and highly animated UI (Framer Motion)
 - 💼 Dynamic display of Experience, Projects, and Certifications
+- 📚 Integrated Git Learning Hub with MDX documentation & visual graphs
 - 🛠️ Categorized Skills showcase with visual icons
 - 💬 Real-time Chat/Messaging system for visitors
 - 🌙 Dark and Light mode support (next-themes)
@@ -31,6 +32,7 @@ This Developer Portfolio is a comprehensive, dynamic web application designed to
 - Tailwind CSS
 - Framer Motion (Animations)
 - shadcn/ui & Base UI (Components)
+- MDX & next-mdx-remote (Documentation)
 
 ### Backend
 - Node.js

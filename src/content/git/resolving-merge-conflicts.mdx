@@ -1,0 +1,102 @@
+---
+title: "Resolving Merge Conflicts"
+description: "A detailed guide on how to understand, approach, and resolve standard merge conflicts in Git."
+category: "Merge"
+difficulty: "Intermediate"
+tags: ["merge","conflict","resolve","troubleshoot"]
+order: 5
+---
+
+Merge conflicts are one of the most feared parts of using Git, but they are completely normal and very easy to fix once you understand what they are.
+
+## What is a Merge Conflict?
+
+A merge conflict happens when Git is trying to combine two branches together, but it finds that **two people edited the exact same lines in the exact same file**. 
+
+Git is usually very smart. If you edit the top of a file and a teammate edits the bottom of a file, Git merges them together automatically. But if you both edit line 42, Git stops and says, *"I don't know whose code is correct here. You have to tell me."* This is a conflict.
+
+## How to Tell You Have a Conflict
+
+You will know you have a conflict because when you run `git merge` (or `git pull`, which includes a merge), your terminal will print an error message that looks like this:
+
+```text
+Auto-merging index.html
+CONFLICT (content): Merge conflict in index.html
+Automatic merge failed; fix conflicts and then commit the result.
+```
+
+If you run `git status`, the conflicted files will be listed in red under "**Unmerged paths**".
+
+## What a Conflict Looks Like in Code
+
+When a conflict happens, Git modifies the file that has the issue and injects special markers to show you exactly where the problem is. If you open the conflicted file in your code editor, it will look something like this:
+
+```html
+<header>
+<<<<<<< HEAD
+  <h1>Welcome to our Application!</h1>
+=======
+  <h1>Welcome to the Dashboard!</h1>
+>>>>>>> feature-branch
+</header>
+```
+
+**Here is what those markers mean:**
+* `<<<<<<< HEAD`: This is the start of the conflict. Everything between this line and the `=======` is the code from **your current branch** (where you are merging *into*).
+* `=======`: This is the dividing line. 
+* `>>>>>>> feature-branch`: This is the end of the conflict. Everything between the dividing line and this line is the code from the **branch you are trying to merge**.
+
+## How to Resolve the Conflict
+
+Resolving a conflict just means editing the file to look exactly how you want the final version to look. You must delete Git's special markers in the process.
+
+### Step 1: Open the file and edit the code
+Open the conflicted file in your text editor. Look at both versions of the code and decide what to keep. 
+
+**Option A: Keep your code**
+Delete the markers and the incoming code.
+```html
+<header>
+  <h1>Welcome to our Application!</h1>
+</header>
+```
+
+**Option B: Keep their code**
+Delete the markers and your code.
+```html
+<header>
+  <h1>Welcome to the Dashboard!</h1>
+</header>
+```
+
+**Option C: Combine both!**
+Often, you actually need parts of both changes. Just delete the markers and rewrite the code how it should be.
+```html
+<header>
+  <h1>Welcome to our Dashboard Application!</h1>
+</header>
+```
+
+### Step 2: Tell Git you fixed it
+Once you have saved the file and all the `<<<<<<<`, `=======`, and `>>>>>>>` markers are completely gone, you must tell Git that the conflict in this file is resolved. You do this by staging the file:
+
+```bash
+git add index.html
+```
+
+### Step 3: Finish the merge
+Once you have resolved and `add`ed all conflicted files, you finish the merge by creating a commit:
+
+```bash
+git commit
+```
+*Note: Git will automatically provide a pre-written commit message saying "Merge branch X into Y". You can just save and close the text editor.*
+
+## Pro Tips
+
+* **Don't Panic:** A merge conflict does not mean your code is broken. It just means Git needs your human judgment.
+* **Abort if needed:** If you get overwhelmed and want to cancel the merge entirely and go back to how things were before you typed `git merge`, you can safely run:
+  ```bash
+  git merge --abort
+  ```
+* **Use VS Code (or your IDE):** Modern editors like VS Code have built-in tools for merge conflicts. They highlight the conflicts in color and give you clickable buttons like "Accept Current Change", "Accept Incoming Change", or "Accept Both Changes" so you don't have to delete the `<<<<<<<` markers manually!

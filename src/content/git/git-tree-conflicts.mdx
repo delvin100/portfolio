@@ -1,0 +1,44 @@
+---
+title: "Tree Conflicts"
+description: "Understand and resolve modify vs. delete conflicts."
+category: "Advanced Conflicts"
+difficulty: "Advanced"
+tags: ["conflict","tree","delete","modify"]
+order: 12
+---
+
+A **Tree Conflict** is a specific type of merge conflict. While a standard conflict happens when two people edit the exact same lines of text, a tree conflict happens when the *file structure itself* is in dispute.
+
+## When Does it Happen?
+
+The most common scenario is when one developer modifies a file, and another developer **deletes or renames** that exact same file. 
+
+When you try to merge these two branches together, Git stops and says:
+`CONFLICT (modify/delete): index.html deleted in HEAD and modified in branchB.`
+
+Git doesn't know what to do. Should it keep the modifications and cancel the deletion? Or should it throw away the modifications and delete the file?
+
+## How to Resolve It
+
+Because this isn't a text conflict, you won't see any `<<<<<<< HEAD` markers inside the file. Instead, you have to manually tell Git your final decision using terminal commands.
+
+### Option A: Keep the Modifications (Undelete)
+If you decide that the file should NOT have been deleted, and you want to keep the modifications you made, you tell Git to add the file back to the staging area:
+
+```bash
+git add index.html
+```
+
+### Option B: Accept the Deletion
+If you decide that the other developer was right to delete the file, and your modifications are no longer needed, you tell Git to officially remove it:
+
+```bash
+git rm index.html
+```
+
+## Finishing the Merge
+Once you have made your choice and run either `git add` or `git rm`, the conflict is resolved. You can now finish the merge by committing:
+
+```bash
+git commit
+```

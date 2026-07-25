@@ -1,0 +1,39 @@
+---
+title: "git reflog"
+description: "Manage reflog information and recover lost commits."
+category: "Advanced Commands"
+difficulty: "Advanced"
+tags: ["reflog","recover","undo","history"]
+order: 8
+---
+
+The `git reflog` command is your safety net. It records every time the tip of your branches are updated, even if you delete branches or force reset them.
+
+## Why Use It
+
+If you ever run a dangerous command like `git reset --hard HEAD~1` and accidentally delete a commit you actually wanted, `git log` won't show it anymore. However, `git reflog` keeps a diary of where your `HEAD` pointer has been for the last 90 days. You can use it to find the hash of the "lost" commit and recover it.
+
+## Syntax
+
+```bash
+git reflog
+```
+
+## Examples
+
+**View the reflog**
+```bash
+git reflog
+```
+*Output will look something like:*
+```text
+4a3b2c1 HEAD@{0}: reset: moving to HEAD~1
+9f8e7d6 HEAD@{1}: commit: added new feature
+```
+
+**Recover a lost commit**
+If you see that `9f8e7d6` was the commit you accidentally deleted, you can just reset back to it!
+```bash
+git reset --hard 9f8e7d6
+```
+*(Or you can `git cherry-pick 9f8e7d6` or create a new branch from it).*

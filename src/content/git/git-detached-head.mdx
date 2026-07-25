@@ -1,0 +1,43 @@
+---
+title: "Detached HEAD State"
+description: "Understand what a detached HEAD is and how to safely navigate it."
+category: "Advanced Conflicts"
+difficulty: "Advanced"
+tags: ["detached","head","checkout","recovery"]
+order: 13
+---
+
+Seeing the warning **"You are in 'detached HEAD' state"** can be terrifying the first time it happens, but it is a perfectly normal and safe feature of Git.
+
+## What is it?
+
+Normally, your `HEAD` (the pointer that tells Git what your current working directory looks like) points to a **branch name**, like `main` or `feature-x`. 
+
+You enter a "Detached HEAD" state when you check out a **specific commit hash, a tag, or a remote branch directly**, rather than a local branch name.
+
+```bash
+git checkout 3e887ab
+```
+
+In this state, `HEAD` is pointing directly to the commit `3e887ab`, detached from any branch.
+
+## Why is it dangerous?
+
+It is perfectly safe to look around and run tests in a detached HEAD state. 
+
+The danger comes if you start writing code and making **new commits**. Because you aren't on a branch, those new commits don't belong to anything. The moment you type `git checkout main`, Git leaves those commits behind, and they become "orphans" floating in the void. They are very difficult to find again!
+
+## How to Fix It
+
+### If you just wanted to look around:
+If you haven't made any new commits and you are done inspecting the old code, just check out your normal branch again. Everything will go back to normal.
+```bash
+git checkout main
+```
+
+### If you made commits and want to keep them:
+If you accidentally started working in a detached HEAD state and created commits, don't panic. You just need to create a new branch right where you are standing. This gives your new commits a home.
+```bash
+git checkout -b my-recovery-branch
+```
+Now you are safely on a new branch containing your work, and you are no longer detached!

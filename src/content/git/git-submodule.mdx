@@ -1,0 +1,35 @@
+---
+title: "git submodule"
+description: "Initialize, update, or inspect submodules."
+category: "Advanced Commands"
+difficulty: "Advanced"
+tags: ["submodule","repository","dependencies"]
+order: 10
+---
+
+The `git submodule` command allows you to keep another Git repository as a subdirectory of your own Git repository. 
+
+## Why Use It
+
+Sometimes your project needs to use another project (like a third-party library or a shared theme) that is also actively being developed in its own Git repository. If you simply copy and paste their files into your project, you lose the ability to easily pull their latest updates. Submodules allow you to clone their repository *inside* yours, while keeping their commit history entirely separate.
+
+## Syntax
+
+```bash
+git submodule <command>
+```
+
+## Examples
+
+**Add a new submodule to your project**
+```bash
+git submodule add https://github.com/username/library.git
+```
+*This clones the library into a folder named `library` and creates a special `.gitmodules` file to track it.*
+
+**Clone a repository that contains submodules**
+When you clone a repository that someone else made which uses submodules, the submodule folders will be empty by default! You must run:
+```bash
+git submodule update --init --recursive
+```
+*(Alternatively, you can just clone it with `git clone --recurse-submodules <url>` in the first place).*

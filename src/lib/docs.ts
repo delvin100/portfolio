@@ -119,6 +119,8 @@ export function getSidebarNav() {
     'GitLab',
     'GitHub CLI',
     'GitLab CLI',
+    'Advanced Commands',
+    'Advanced Conflicts',
     'Best Practices',
     'Troubleshooting',
     'Cheat Sheet'

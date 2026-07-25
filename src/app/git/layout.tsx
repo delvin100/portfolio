@@ -2,7 +2,7 @@ import { getSidebarNav } from "@/lib/docs";
 import { Sidebar } from "@/components/docs/sidebar";
 import { Search } from "@/components/docs/search";
 import Link from "next/link";
-import { Menu } from "lucide-react";
+import { MobileNav } from "@/components/docs/mobile-nav";
 import { FaGithub } from "react-icons/fa6";
 
 export default function GitDocsLayout({
@@ -25,7 +25,7 @@ export default function GitDocsLayout({
               </span>
             </div>
           </div>
-          {/* Mobile menu could go here */}
+          <MobileNav navItems={navItems} />
           <div className="flex flex-1 items-center justify-between space-x-6 md:justify-end">
             <div className="w-full flex-1 md:w-auto md:flex-none">
               <Search />

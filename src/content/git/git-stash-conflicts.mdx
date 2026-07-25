@@ -1,0 +1,53 @@
+---
+title: "Stash Conflicts"
+description: "Resolve conflicts when popping a stash."
+category: "Advanced Conflicts"
+difficulty: "Advanced"
+tags: ["stash","conflict","pop","apply"]
+order: 15
+---
+
+Using `git stash` is a great way to temporarily hide your work so you can switch branches. But sometimes, bringing that work back out of the stash can cause a conflict.
+
+## When Does it Happen?
+
+1. You edit `index.html` and run `git stash` to hide it.
+2. You check out a different branch, or pull new code from GitHub.
+3. This new code also modifies the exact same lines in `index.html`.
+4. You run `git stash pop` to bring your hidden work back.
+
+Git stops and says:
+`CONFLICT (content): Merge conflict in index.html`
+
+Your stashed changes conflict with the new state of the working directory.
+
+## How to Resolve It
+
+Resolving a stash conflict is almost identical to resolving a normal merge conflict.
+
+### Step 1: Fix the code
+Open the conflicted file in your editor. You will see the standard conflict markers:
+```html
+<<<<<<< Updated upstream
+  <h1>Welcome to the new Dashboard!</h1>
+=======
+  <h1>Welcome to our Application!</h1>
+>>>>>>> Stashed changes
+```
+Delete the markers and edit the code to look how you want it.
+
+### Step 2: Stage the file
+Tell Git you have resolved the conflict:
+```bash
+git add index.html
+```
+
+### Step 3: Drop the stash manually
+When `git stash pop` succeeds, it automatically deletes the stash from your clipboard. **However, when `git stash pop` hits a conflict, it leaves the stash in your clipboard as a safety measure.**
+
+Once you have fixed the conflict and added the file, you need to manually delete the stash so it doesn't clutter up your list:
+
+```bash
+git stash drop
+```
+*(This deletes the most recent stash, which is usually the one that just conflicted).*

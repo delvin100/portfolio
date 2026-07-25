@@ -1,0 +1,40 @@
+---
+title: "git worktree"
+description: "Manage multiple working trees attached to the same repository."
+category: "Advanced Commands"
+difficulty: "Advanced"
+tags: ["worktree","multiple","branches","checkout"]
+order: 9
+---
+
+The `git worktree` command allows you to have multiple branches checked out in different directories on your computer at the exact same time, all linked to the same local repository.
+
+## Why Use It
+
+Imagine you are in the middle of writing a massive new feature on a branch, but your boss asks you to urgently fix a bug on `main`. Normally, you would have to `git stash` your work, checkout `main`, fix the bug, push it, checkout your feature branch again, and `git stash pop`. 
+
+With `git worktree`, you can simply spawn a new folder on your computer that has `main` checked out, fix the bug in that folder, and delete the folder when you're done. Your main working directory with your feature branch remains completely untouched.
+
+## Syntax
+
+```bash
+git worktree add <path> <branch>
+```
+
+## Examples
+
+**Create a new worktree for a hotfix**
+```bash
+git worktree add ../hotfix-folder main
+```
+*This creates a new folder named `hotfix-folder` one level up, and checks out the `main` branch into it. You can now open this folder in your editor and work on it independently.*
+
+**List all active worktrees**
+```bash
+git worktree list
+```
+
+**Remove a worktree when you are done**
+```bash
+git worktree remove ../hotfix-folder
+```

@@ -1,0 +1,40 @@
+---
+title: "git show"
+description: "View expanded details on Git objects such as commits."
+category: "Advanced Commands"
+difficulty: "Advanced"
+tags: ["show","inspect","commit","objects"]
+order: 1
+---
+
+The `git show` command is used to view expanded details about Git objects like blobs, trees, tags, and commits. Most commonly, it is used to see the exact changes (diff) introduced by a specific commit.
+
+## Why Use It
+
+While `git log` shows a list of commits, `git show` lets you dive deep into what actually changed within a specific commit.
+
+## Syntax
+
+```bash
+git show <object>
+```
+
+## Examples
+
+**Show the last commit**
+```bash
+git show HEAD
+```
+*Shows the metadata and the diff of the most recent commit on your current branch.*
+
+**Show a specific commit**
+```bash
+git show 3e887ab
+```
+*Replace `3e887ab` with the SHA hash of the commit you want to inspect.*
+
+**Show a specific file from an older commit**
+```bash
+git show 3e887ab:index.html
+```
+*This allows you to view the exact contents of `index.html` as it existed in commit `3e887ab`, without checking out the entire commit.*

@@ -1,0 +1,34 @@
+---
+title: "git mv"
+description: "Move or rename a file, a directory, or a symlink."
+category: "Advanced Commands"
+difficulty: "Advanced"
+tags: ["move","rename","files"]
+order: 3
+---
+
+The `git mv` command is used to move or rename a file, directory, or symlink within a Git repository. It effectively executes a rename and automatically stages the change.
+
+## Why Use It
+
+If you rename a file manually in your file explorer or code editor, Git will interpret this as two separate events: a file deletion (the old name) and a new untracked file (the new name). By using `git mv`, Git understands that the file was simply renamed, preserving its entire commit history.
+
+## Syntax
+
+```bash
+git mv <source> <destination>
+```
+
+## Examples
+
+**Rename a file**
+```bash
+git mv old-name.txt new-name.txt
+```
+*Renames the file and stages the rename.*
+
+**Move a file to a new folder**
+```bash
+git mv index.html src/pages/index.html
+```
+*Moves `index.html` into the `src/pages/` directory and stages the move.*

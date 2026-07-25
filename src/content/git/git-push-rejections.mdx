@@ -1,0 +1,52 @@
+---
+title: "Push Rejections"
+description: "Handle non-fast-forward push rejections from remote repositories."
+category: "Advanced Conflicts"
+difficulty: "Advanced"
+tags: ["push","reject","remote","fetch"]
+order: 14
+---
+
+One of the most common errors when working on a team is having your `git push` rejected by the remote server (like GitHub).
+
+## The Error Message
+
+When you try to run `git push origin main`, you might see a scary wall of text that includes this:
+
+```text
+! [rejected]        main -> main (fetch first)
+error: failed to push some refs to 'https://github.com/username/repo.git'
+hint: Updates were rejected because the remote contains work that you do
+hint: not have locally. This is usually caused by another repository pushing
+hint: to the same ref. You may want to first integrate the remote changes
+hint: (e.g., 'git pull ...') before pushing again.
+```
+
+## Why it Happens
+
+This is actually Git protecting your team's code! 
+
+It means that while you were working on your computer, a teammate pushed new code up to GitHub on the same branch. If Git allowed your push to go through, it would overwrite and delete your teammate's work. Git rejects your push (calling it a "non-fast-forward" push) to force you to download their changes first.
+
+## How to Fix It
+
+You must download your teammate's changes and integrate them with your own local work before you are allowed to push. 
+
+### Step 1: Pull the latest changes
+The safest way to do this without creating a messy merge commit is to pull with the rebase flag:
+
+```bash
+git pull origin main --rebase
+```
+
+*This downloads their new code, applies it, and then magically applies your new commits on top of theirs.*
+
+### Step 2: Handle any conflicts
+If you and your teammate edited the exact same lines of code, the pull will pause and tell you there is a merge conflict. You will need to open the files, fix the conflict, `git add .`, and then run `git rebase --continue`.
+
+### Step 3: Push again
+Once the pull is complete and any conflicts are resolved, your local repository now contains both their work and your work safely integrated. You can now successfully upload it:
+
+```bash
+git push origin main
+```
