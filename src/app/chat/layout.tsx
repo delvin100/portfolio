@@ -9,6 +9,11 @@ export const metadata: Metadata = {
 import { createClient } from "@/lib/supabase/server"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
+import { getAdminUser } from "@/actions/chat"
+import { PresenceProvider } from "@/components/chat/presence-provider"
+import { ChatLayoutClient } from "@/components/chat/chat-layout-client"
+
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'delvin'
 
 export default async function ChatLayout({
   children,
@@ -22,55 +27,34 @@ export default async function ChatLayout({
     redirect('/chat-login')
   }
 
-  // Fetch conversations for the current user
+  // Fetch the current user for the sidebar header
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
-    include: {
-      conversations: {
-        include: {
-          conversation: {
-            include: {
-              messages: {
-                orderBy: { createdAt: 'desc' },
-                take: 1
-              },
-              members: {
-                where: { userId: { not: user.id } },
-                include: { user: true }
-              }
-            }
-          }
-        }
-      }
-    }
   })
 
-  // Format conversations for the Sidebar UI
-  const conversations = dbUser?.conversations.map(member => {
-    const conv = member.conversation
-    const lastMessage = conv.messages[0]
-    const otherUser = conv.members[0]?.user
-    return {
-      id: conv.id,
-      name: conv.name || otherUser?.name || "Private Chat",
-      lastMessage: lastMessage ? lastMessage.content : "No messages yet",
-      time: lastMessage ? new Date(lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",
-      unread: 0, // Implement real unread count later
-      online: false, // Implement real-time presence later
-    }
-  }) || []
+  // Fetch and format conversations using the shared server action (which handles filtering)
+  const { getUserConversations } = await import('@/actions/chat');
+  const conversations = await getUserConversations();
+
+  const isAdmin = dbUser?.username === ADMIN_USERNAME;
+  const adminUser = !isAdmin ? await getAdminUser() : null;
+
+  const sidebarContent = isAdmin ? (
+    <div className="hidden md:block border-r border-border/40 relative z-10 bg-background/40 backdrop-blur-md h-full">
+      <ChatSidebar 
+        initialConversations={conversations} 
+        currentUser={dbUser} 
+        isAdmin={isAdmin}
+        adminUser={adminUser}
+      />
+    </div>
+  ) : null
 
   return (
-    <div className="flex w-full h-[calc(100vh-4rem)] max-w-7xl mx-auto border rounded-xl overflow-hidden shadow-sm my-4">
-      {/* Sidebar - hidden on small screens when a chat is open (can be improved with state later) */}
-      <div className="hidden md:block">
-        <ChatSidebar initialConversations={conversations} currentUser={dbUser} />
-      </div>
-      
-      {/* Main Chat Area */}
-      <div className="flex-1 bg-background flex flex-col relative">
+    <PresenceProvider currentUserId={user.id}>
+      <ChatLayoutClient sidebar={sidebarContent}>
         {children}
-      </div>
-    </div>
+      </ChatLayoutClient>
+    </PresenceProvider>
   )
 }

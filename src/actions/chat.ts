@@ -4,6 +4,14 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'delvin'
+
+export async function getAdminUser() {
+  return await prisma.user.findUnique({
+    where: { username: ADMIN_USERNAME }
+  })
+}
+
 export async function searchUsers(query: string) {
   if (!query || query.trim().length === 0) {
     return []
@@ -14,6 +22,25 @@ export async function searchUsers(query: string) {
 
   if (!user) {
     throw new Error("Unauthorized")
+  }
+
+  let dbUser = await prisma.user.findUnique({ where: { id: user.id } })
+  
+  if (!dbUser) {
+    // Self-heal: Create user if they exist in Supabase but not Prisma
+    const defaultUsername = user.email ? user.email.split('@')[0] : `user_${user.id.substring(0, 5)}`
+    dbUser = await prisma.user.create({
+      data: {
+        id: user.id,
+        name: defaultUsername,
+        username: defaultUsername,
+        status: 'Online'
+      }
+    })
+  }
+  
+  if (dbUser.username !== ADMIN_USERNAME) {
+    return [] // Non-admins cannot search
   }
 
   const users = await prisma.user.findMany({
@@ -44,6 +71,32 @@ export async function startConversation(targetUserId: string) {
 
   if (!user) {
     throw new Error("Unauthorized")
+  }
+
+  let dbUser = await prisma.user.findUnique({ where: { id: user.id } })
+  
+  if (!dbUser) {
+    // Self-heal: Create user if they exist in Supabase but not Prisma
+    const defaultUsername = user.email ? user.email.split('@')[0] : `user_${user.id.substring(0, 5)}`
+    dbUser = await prisma.user.create({
+      data: {
+        id: user.id,
+        name: defaultUsername,
+        username: defaultUsername,
+        status: 'Online'
+      }
+    })
+  }
+
+  const isAdmin = dbUser.username === ADMIN_USERNAME
+
+  // If not admin, they can ONLY start a conversation with the admin
+  if (!isAdmin) {
+    const adminUser = await getAdminUser()
+    if (!adminUser) throw new Error("Admin user not found")
+    if (targetUserId !== adminUser.id) {
+      throw new Error("Regular users can only chat with the admin")
+    }
   }
 
   // 1. Check if a direct conversation already exists between these two users
@@ -153,7 +206,8 @@ export async function getMessages(conversationId: string, cursor?: string, limit
           name: true,
           profileImage: true
         }
-      }
+      },
+      attachments: true
     }
   })
 
@@ -169,7 +223,11 @@ export async function getMessages(conversationId: string, cursor?: string, limit
   }
 }
 
-export async function sendMessage(conversationId: string, content: string) {
+export async function sendMessage(
+  conversationId: string, 
+  content: string,
+  attachments?: { url: string; fileType: string; name: string }[]
+) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -177,15 +235,21 @@ export async function sendMessage(conversationId: string, content: string) {
     throw new Error("Unauthorized")
   }
   
-  if (!content || content.trim().length === 0) {
+  if ((!content || content.trim().length === 0) && (!attachments || attachments.length === 0)) {
     return null;
   }
 
   const message = await prisma.message.create({
     data: {
-      content: content.trim(),
+      content: content ? content.trim() : "",
       conversationId,
       senderId: user.id,
+      attachments: attachments?.length ? {
+        create: attachments
+      } : undefined
+    },
+    include: {
+      attachments: true
     }
   })
 
@@ -198,7 +262,7 @@ export async function getUserConversations() {
 
   if (!user) return []
 
-  const dbUser = await prisma.user.findUnique({
+  let dbUser = await prisma.user.findUnique({
     where: { id: user.id },
     include: {
       conversations: {
@@ -220,19 +284,36 @@ export async function getUserConversations() {
     }
   })
 
-  const conversations = dbUser?.conversations.map(member => {
-    const conv = member.conversation
-    const lastMessage = conv.messages[0]
-    const otherUser = conv.members[0]?.user
-    return {
-      id: conv.id,
-      name: conv.name || otherUser?.name || "Private Chat",
-      lastMessage: lastMessage ? lastMessage.content : "No messages yet",
-      time: lastMessage ? new Date(lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",
-      unread: 0,
-      online: false,
-    }
-  }) || []
+  if (!dbUser) {
+    const defaultUsername = user.email ? user.email.split('@')[0] : `user_${user.id.substring(0, 5)}`
+    await prisma.user.create({
+      data: {
+        id: user.id,
+        name: defaultUsername,
+        username: defaultUsername,
+        status: 'Online'
+      }
+    })
+    return [] // Return empty conversations for newly created user
+  }
+
+  const conversations = (dbUser?.conversations || [])
+    .filter(member => member.conversation.messages.length > 0)
+    .map(member => {
+      const conv = member.conversation
+      const lastMessage = conv.messages[0]
+      const otherUser = conv.members[0]?.user
+      return {
+        id: conv.id,
+        otherUserId: otherUser?.id,
+        name: conv.name || otherUser?.name || "Private Chat",
+        username: otherUser?.username || "unknown",
+        lastMessage: lastMessage.content,
+        time: new Date(lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        unread: 0,
+        online: otherUser?.status === "Online",
+      }
+    })
 
   // Sort conversations by latest message time
   conversations.sort((a, b) => {
@@ -241,5 +322,20 @@ export async function getUserConversations() {
     return timeB - timeA;
   });
 
-  return conversations
+  // Deduplicate conversations by otherUserId (keep the most recent one)
+  const uniqueConversations = [];
+  const seenUserIds = new Set();
+  
+  for (const conv of conversations) {
+    if (conv.otherUserId) {
+      if (!seenUserIds.has(conv.otherUserId)) {
+        seenUserIds.add(conv.otherUserId);
+        uniqueConversations.push(conv);
+      }
+    } else {
+      uniqueConversations.push(conv);
+    }
+  }
+
+  return uniqueConversations;
 }

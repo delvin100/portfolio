@@ -1,11 +1,11 @@
 "use client"
 
 import { useState, useEffect, useTransition, useRef } from "react"
-import { Search, MessageSquare, MoreVertical, Edit, Loader2, LogOut } from "lucide-react"
+import { Search, MessageSquare, MoreVertical, Edit, Loader2, LogOut, Settings } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { searchUsers, startConversation, getUserConversations } from "@/actions/chat"
+import { searchUsers, getUserConversations } from "@/actions/chat"
 import { logout } from "@/actions/auth"
 import { useRouter } from "next/navigation"
 import {
@@ -17,21 +17,26 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { getInitials } from "@/lib/utils"
 
 import { createClient } from "@/lib/supabase/client"
+import { usePresence } from "@/components/chat/presence-provider"
 
 interface ChatSidebarProps {
   initialConversations: any[]
   currentUser: any
+  isAdmin?: boolean
+  adminUser?: any
 }
 
-export function ChatSidebar({ initialConversations, currentUser }: ChatSidebarProps) {
+export function ChatSidebar({ initialConversations, currentUser, isAdmin = false, adminUser }: ChatSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [conversations, setConversations] = useState(initialConversations)
   const router = useRouter()
+  const { onlineUsers } = usePresence()
   
   const supabase = useRef(createClient()).current
   
@@ -76,45 +81,49 @@ export function ChatSidebar({ initialConversations, currentUser }: ChatSidebarPr
     return () => clearTimeout(delayDebounceFn)
   }, [searchQuery])
 
-  const handleStartChat = (userId: string) => {
-    startTransition(async () => {
-      try {
-        const convId = await startConversation(userId)
-        router.push(`/chat/${convId}`)
-        setSearchQuery("")
-      } catch (error) {
-        console.error("Failed to start conversation", error)
-      }
+  const handleStartChat = (username: string) => {
+    startTransition(() => {
+      router.push(`/chat/${username}`)
+      setSearchQuery("")
     })
   }
 
   return (
-    <div className="w-full md:w-[350px] lg:w-[400px] border-r flex flex-col h-[calc(100vh-4rem)] bg-background">
+    <div className="w-full md:w-[350px] lg:w-[400px] flex flex-col h-[calc(100vh-4rem)] bg-transparent">
       {/* Header */}
-      <div className="p-4 border-b flex items-center justify-between bg-muted/30">
+      <div className="p-4 border-b border-border/40 flex items-center justify-between bg-black/10">
         <div className="flex items-center gap-3">
-          <Avatar>
+          <Avatar className="h-8 w-8 ring-1 ring-border/50">
             <AvatarImage src={currentUser?.profileImage || ""} />
-            <AvatarFallback>{currentUser?.name?.substring(0, 2).toUpperCase() || "ME"}</AvatarFallback>
+            <AvatarFallback>{getInitials(currentUser?.name)}</AvatarFallback>
           </Avatar>
           <span className="font-semibold">{currentUser?.name || "My Chats"}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <Edit className="h-4 w-4" />
+        <div className="flex items-center gap-1.5 bg-black/10 dark:bg-white/5 p-1 rounded-full border border-black/5 dark:border-white/5 shadow-inner backdrop-blur-md">
+          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors">
+            <Edit className="h-4 w-4" strokeWidth={2.5} />
           </Button>
+          <div className="w-px h-4 bg-border/50 mx-0.5"></div>
           <DropdownMenu>
             <DropdownMenuTrigger render={
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors">
+                <MoreVertical className="h-4 w-4" strokeWidth={2.5} />
               </Button>
             } />
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-48 bg-background/80 backdrop-blur-xl border-white/10 shadow-2xl rounded-xl">
               <DropdownMenuGroup>
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="font-semibold text-foreground/80">My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-border/50" />
                 <DropdownMenuItem 
-                  className="text-red-500 hover:text-red-600 hover:bg-red-500/10 cursor-pointer"
+                  className="focus:bg-primary/10 focus:text-primary rounded-lg cursor-pointer transition-colors"
+                  onClick={() => router.push('/chat/settings')}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-border/50" />
+                <DropdownMenuItem 
+                  className="text-red-500 hover:text-red-600 focus:text-red-500 focus:bg-red-500/10 cursor-pointer rounded-lg transition-colors"
                   onClick={() => logout()}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
@@ -127,18 +136,20 @@ export function ChatSidebar({ initialConversations, currentUser }: ChatSidebarPr
       </div>
 
       {/* Search */}
-      <div className="p-3 border-b">
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search for users..."
-            className="pl-9 bg-muted/50 border-none"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+      {isAdmin && (
+        <div className="p-3 border-b border-border/40 bg-black/5">
+          <div className="relative">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search for users..."
+              className="pl-9 bg-black/20 border-white/5 rounded-xl shadow-inner focus-visible:ring-1 focus-visible:ring-primary/30 transition-all"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Conversation / Search Results List */}
       <div className="flex-1 overflow-y-auto">
@@ -160,12 +171,12 @@ export function ChatSidebar({ initialConversations, currentUser }: ChatSidebarPr
               searchResults.map((user) => (
                 <div
                   key={user.id}
-                  onClick={() => handleStartChat(user.id)}
-                  className="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors border-b border-border/50"
+                  onClick={() => handleStartChat(user.username)}
+                  className="flex items-center gap-3 p-3 hover:bg-white/5 cursor-pointer transition-all border-b border-border/20 m-1 rounded-lg"
                 >
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={user.profileImage || ""} />
-                    <AvatarFallback>{user.username.substring(0, 2).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>{getInitials(user.name || user.username)}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{user.name}</p>
@@ -182,21 +193,36 @@ export function ChatSidebar({ initialConversations, currentUser }: ChatSidebarPr
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-4 text-center space-y-3">
               <MessageSquare className="h-10 w-10 opacity-20" />
               <p>No conversations yet.</p>
-              <p className="text-sm">Search for a user to start chatting!</p>
+              {isAdmin ? (
+                <p className="text-sm">Search for a user to start chatting!</p>
+              ) : (
+                <div className="flex flex-col items-center gap-2 mt-2">
+                  <p className="text-sm mb-2">Start a conversation with the admin!</p>
+                  {adminUser && (
+                    <Button 
+                      onClick={() => handleStartChat(adminUser.username)}
+                      disabled={isPending}
+                    >
+                      {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MessageSquare className="mr-2 h-4 w-4" />}
+                      Message {adminUser.name}
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
           ) : (
             conversations.map((chat) => (
               <div
                 key={chat.id}
-                onClick={() => router.push(`/chat/${chat.id}`)}
-                className="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors border-b border-border/50"
+                onClick={() => router.push(`/chat/${chat.username}`)}
+                className="flex items-center gap-3 p-3 hover:bg-white/5 cursor-pointer transition-all border-b border-border/20 m-1 rounded-lg"
               >
                 <div className="relative">
-                  <Avatar className="h-12 w-12">
-                    <AvatarFallback>{chat.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  <Avatar className="h-12 w-12 shrink-0">
+                    <AvatarFallback>{getInitials(chat.name)}</AvatarFallback>
                   </Avatar>
-                  {chat.online && (
-                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-background rounded-full"></span>
+                  {onlineUsers.includes(chat.otherUserId) && (
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-background rounded-full transition-all duration-300 scale-100"></span>
                   )}
                 </div>
                 

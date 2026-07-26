@@ -25,13 +25,39 @@ export async function login(prevState: ActionState, formData: FormData): Promise
     password,
   }
 
-  const { error } = await supabase.auth.signInWithPassword(data)
+  let authData, error;
+  
+  try {
+    const response = await supabase.auth.signInWithPassword(data);
+    authData = response.data;
+    error = response.error;
+  } catch (err: any) {
+    console.error("Login exception:", err);
+    return { error: "Network or server error during login. Please try again." }
+  }
 
   if (error) {
     if (error.message === 'Invalid login credentials') {
       return { error: 'Invalid Login Credentials' }
     }
     return { error: error.message }
+  }
+
+  if (authData.user) {
+    try {
+      await prisma.user.upsert({
+        where: { id: authData.user.id },
+        update: { status: 'Online' },
+        create: {
+          id: authData.user.id,
+          name: username,
+          username: username,
+          status: 'Online'
+        }
+      })
+    } catch (e) {
+      console.error("Failed to update status on login", e)
+    }
   }
 
   revalidatePath('/', 'layout')
@@ -65,10 +91,18 @@ export async function signup(prevState: ActionState, formData: FormData): Promis
   }
 
   // 1. Create the user in Supabase Auth
-  const { data: authData, error: authError } = await supabase.auth.signUp({
-    email: data.email,
-    password: data.password,
-  })
+  let authData, authError;
+  try {
+    const response = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+    });
+    authData = response.data;
+    authError = response.error;
+  } catch (err: any) {
+    console.error("Signup exception:", err);
+    return { error: "Network or server error during signup. Please try again." }
+  }
 
   if (authError) {
     return { error: authError.message }
@@ -82,6 +116,7 @@ export async function signup(prevState: ActionState, formData: FormData): Promis
           id: authData.user.id,
           name: data.name,
           username: data.username,
+          status: 'Online',
         }
       })
     } catch (dbError: any) {
@@ -96,7 +131,28 @@ export async function signup(prevState: ActionState, formData: FormData): Promis
 
 export async function logout() {
   const supabase = await createClient()
-  await supabase.auth.signOut()
+  
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (user) {
+      try {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { status: 'Offline', lastSeen: new Date() }
+        })
+      } catch (e) {
+        console.error("Failed to update status on logout", e)
+      }
+    }
+
+    await supabase.auth.signOut()
+  } catch (err) {
+    console.error("Logout network error:", err)
+    // Even if Supabase network fails, we should clear the cookies by calling signOut if possible,
+    // but signOut also makes a network request. If it fails, we still want to redirect.
+  }
+
   redirect('/chat-login')
 }
 

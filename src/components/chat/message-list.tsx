@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState, useCallback } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Check, Loader2 } from "lucide-react"
+import { Check, Loader2, MessageSquareDashed, Paperclip } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { getMessages } from "@/actions/chat"
+import { getInitials } from "@/lib/utils"
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso"
 
 interface MessageListProps {
@@ -74,7 +75,7 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
 
   const renderMessage = (index: number, msg: any) => {
     const isMe = msg.senderId === currentUserId
-    const fallback = msg.sender?.name?.substring(0, 2).toUpperCase() || "U"
+    const fallback = getInitials(msg.sender?.name)
     
     let timeStr = ""
     try {
@@ -95,13 +96,39 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
           
           <div className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
             <div 
-              className={`px-4 py-2 rounded-2xl shadow-sm ${
+              className={`px-4 py-2.5 rounded-2xl shadow-sm ${
                 isMe 
-                  ? "bg-primary text-primary-foreground rounded-br-sm" 
-                  : "bg-card border rounded-bl-sm"
+                  ? "bg-gradient-to-br from-indigo-600 to-indigo-500 text-white rounded-br-sm shadow-indigo-900/20" 
+                  : "bg-card border border-border/40 rounded-bl-sm text-card-foreground shadow-black/5"
               }`}
             >
-              <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</p>
+              {msg.attachments && msg.attachments.length > 0 && (
+                <div className={`flex flex-col gap-2 ${msg.content ? 'mb-3' : ''}`}>
+                  {msg.attachments.map((att: any, i: number) => (
+                    att.fileType?.startsWith('image/') ? (
+                      <a key={i} href={att.url} target="_blank" rel="noopener noreferrer" className="block relative rounded-lg overflow-hidden border border-white/10 max-w-xs sm:max-w-sm">
+                        <img src={att.url} alt={att.name} className="w-full h-auto max-h-64 object-cover hover:scale-105 transition-transform duration-500" />
+                      </a>
+                    ) : (
+                      <a 
+                        key={i} 
+                        href={att.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-2.5 rounded-xl bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 transition-colors border border-white/5"
+                      >
+                        <div className="h-10 w-10 shrink-0 bg-background/50 rounded-lg flex items-center justify-center text-current">
+                          <Paperclip className="h-5 w-5" />
+                        </div>
+                        <span className="text-sm font-medium truncate max-w-[150px] sm:max-w-[200px]">{att.name}</span>
+                      </a>
+                    )
+                  ))}
+                </div>
+              )}
+              {msg.content && (
+                <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</p>
+              )}
             </div>
             
             <div className="flex items-center gap-1 mt-1 px-1">
@@ -119,12 +146,24 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
   }
 
   return (
-    <div className="flex-1 p-4 bg-muted/10">
-      {messages.length === 0 ? (
-        <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-          No messages yet. Send a message to start the conversation!
+    <div className="flex-1 p-4 bg-transparent flex flex-col h-full overflow-hidden">
+      {messages.length === 0 && (
+        <div className="flex-1 flex flex-col items-center justify-center p-8 min-h-0 text-center animate-in fade-in duration-700">
+          <div className="relative group mb-6">
+            <div className="absolute inset-0 bg-indigo-500/20 rounded-full blur-xl group-hover:bg-indigo-500/30 transition-colors duration-700" />
+            <div className="w-20 h-20 rounded-full border border-indigo-500/20 bg-card/50 backdrop-blur-sm flex items-center justify-center relative z-10 shadow-[0_0_15px_rgba(99,102,241,0.1)] group-hover:scale-105 transition-transform duration-500">
+              <MessageSquareDashed className="h-8 w-8 text-indigo-400 group-hover:text-indigo-300 transition-colors duration-500" strokeWidth={1.5} />
+            </div>
+          </div>
+          <h3 className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-white/90 to-white/60 mb-3 tracking-tight">
+            Start the conversation
+          </h3>
+          <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
+            Send a message below to begin chatting. Your conversation will be securely saved here.
+          </p>
         </div>
-      ) : (
+      )}
+      {messages.length > 0 && (
         <Virtuoso
           ref={virtuosoRef}
           data={messages}

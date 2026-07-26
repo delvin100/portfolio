@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { formatDistanceToNow } from "date-fns"
+import { getInitials } from "@/lib/utils"
 import { prisma } from '@/lib/prisma'
 import { DeleteUserButton } from './delete-user-button'
 import { EditUserButton } from './edit-user-button'
@@ -44,7 +46,7 @@ export default async function AdminUsersPage() {
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8 rounded-full bg-primary/20">
                           <AvatarImage src={user.profileImage || undefined} alt={user.name} />
-                          <AvatarFallback className="rounded-full bg-primary/20 text-primary">{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                          <AvatarFallback className="rounded-full bg-primary/20 text-primary">{getInitials(user.name || user.username)}</AvatarFallback>
                         </Avatar>
                         <span className="truncate">{user.name}</span>
                       </div>
