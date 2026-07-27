@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState, useCallback } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Check, Loader2, MessageSquareDashed, Paperclip } from "lucide-react"
+import { Check, CheckCheck, Loader2, MessageSquareDashed, Paperclip } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
-import { getMessages } from "@/actions/chat"
+import { getMessages, markMessagesAsRead } from "@/actions/chat"
 import { getInitials } from "@/lib/utils"
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso"
 import { useRouter } from "next/navigation"
@@ -125,12 +125,49 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
           }
         }
       )
+      .on(
+        'broadcast',
+        { event: 'read_receipt' },
+        (payload) => {
+          if (payload.payload.readBy !== currentUserId) {
+            setMessages((prev) => prev.map(m => 
+              (m.senderId === currentUserId && !m.isRead) ? { ...m, isRead: true } : m
+            ))
+          }
+        }
+      )
       .subscribe()
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [conversationId, supabase, router])
+  }, [conversationId, supabase, router, currentUserId])
+
+  // Mark messages as read and broadcast receipt
+  useEffect(() => {
+    const hasUnread = messages.some(m => !m.isRead && m.senderId !== currentUserId)
+    if (hasUnread) {
+      Promise.resolve().then(async () => {
+        try {
+          await markMessagesAsRead(conversationId)
+          // Broadcast read receipt
+          const channel = supabase.channel(`realtime:messages:${conversationId}`)
+          channel.send({
+            type: 'broadcast',
+            event: 'read_receipt',
+            payload: { conversationId, readBy: currentUserId }
+          }).catch(console.error)
+          
+          // Optimistically update our own state
+          setMessages(prev => prev.map(m => 
+            (m.senderId !== currentUserId && !m.isRead) ? { ...m, isRead: true } : m
+          ))
+        } catch (e) {
+          console.error("Failed to mark as read:", e)
+        }
+      })
+    }
+  }, [messages, conversationId, currentUserId, supabase])
 
   const loadMore = useCallback(async () => {
     if (!nextCursor || isLoadingMore) return
@@ -218,7 +255,11 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
               <span className="text-[10px] text-muted-foreground" suppressHydrationWarning>{timeStr}</span>
               {isMe && (
                 <span className="text-muted-foreground">
-                  <Check className="h-3 w-3" />
+                  {msg.isRead ? (
+                    <CheckCheck className="h-3 w-3 text-indigo-200" />
+                  ) : (
+                    <Check className="h-3 w-3" />
+                  )}
                 </span>
               )}
             </div>

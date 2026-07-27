@@ -356,3 +356,23 @@ export async function getUserConversations() {
 
   return uniqueConversations;
 }
+
+export async function markMessagesAsRead(conversationId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error("Unauthorized")
+  }
+
+  await prisma.message.updateMany({
+    where: {
+      conversationId,
+      senderId: { not: user.id },
+      isRead: false
+    },
+    data: {
+      isRead: true
+    }
+  })
+}

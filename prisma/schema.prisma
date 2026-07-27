@@ -120,6 +120,7 @@ model Message {
   conversationId String
   senderId       String
   isDeleted      Boolean  @default(false)
+  isRead         Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   

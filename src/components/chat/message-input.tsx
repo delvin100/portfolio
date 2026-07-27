@@ -123,7 +123,8 @@ export function MessageInput({ conversationId, currentUserId }: MessageInputProp
         conversationId,
         createdAt: new Date().toISOString(),
         attachments,
-        senderId: currentUserId, // Sender knows who they are, so isMe will be true!
+        senderId: currentUserId,
+        isRead: false
       }
 
       // 1. Dispatch locally so the sender's UI updates instantly (0ms delay)
