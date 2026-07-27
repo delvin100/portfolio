@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client"
 import { getMessages } from "@/actions/chat"
 import { getInitials } from "@/lib/utils"
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso"
+import { useRouter } from "next/navigation"
 
 interface MessageListProps {
   initialMessages: any[]
@@ -20,9 +21,32 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
   const [messages, setMessages] = useState(initialMessages)
   const [nextCursor, setNextCursor] = useState(initialNextCursor)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const router = useRouter()
   
   // Memoize supabase client
   const supabase = useRef(createClient()).current
+
+  // Sync state when initialMessages changes (e.g. after sending a message and router.refresh())
+  useEffect(() => {
+    setMessages(prev => {
+      const merged = [...prev]
+      let changed = false
+      for (const msg of initialMessages) {
+        if (!merged.some(m => m.id === msg.id)) {
+          merged.push(msg)
+          changed = true
+        }
+      }
+      if (changed) {
+        return merged.sort((a, b) => {
+          const timeA = new Date(typeof a.createdAt === 'string' && !a.createdAt.endsWith('Z') ? a.createdAt + 'Z' : a.createdAt).getTime()
+          const timeB = new Date(typeof b.createdAt === 'string' && !b.createdAt.endsWith('Z') ? b.createdAt + 'Z' : b.createdAt).getTime()
+          return timeA - timeB
+        })
+      }
+      return prev
+    })
+  }, [initialMessages])
 
   // Realtime subscription for incoming messages
   useEffect(() => {
@@ -51,12 +75,21 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
           // Since it's a 1-on-1 chat, we often know the sender visually already.
         }
       )
+      .on(
+        'broadcast',
+        { event: 'sync_messages' },
+        (payload) => {
+          // Received a manual broadcast to sync messages!
+          // This ensures the receiver fetches the latest messages even if postgres_changes fails.
+          router.refresh()
+        }
+      )
       .subscribe()
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [conversationId, supabase])
+  }, [conversationId, supabase, router])
 
   const loadMore = useCallback(async () => {
     if (!nextCursor || isLoadingMore) return
@@ -64,7 +97,11 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
     try {
       const { messages: olderMessages, nextCursor: newCursor } = await getMessages(conversationId, nextCursor)
       // Prepend older messages
-      setMessages((prev) => [...olderMessages, ...prev])
+      setMessages((prev) => {
+        // filter out any duplicates just in case
+        const uniqueOlder = olderMessages.filter(om => !prev.some(pm => pm.id === om.id))
+        return [...uniqueOlder, ...prev]
+      })
       setNextCursor(newCursor)
     } catch (e) {
       console.error(e)
@@ -79,7 +116,12 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
     
     let timeStr = ""
     try {
-      timeStr = new Date(msg.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+      // Supabase realtime timestamps might lack the 'Z' which causes them to be parsed as local time.
+      let dateValue = msg.createdAt
+      if (typeof dateValue === 'string' && !dateValue.endsWith('Z')) {
+        dateValue = dateValue + 'Z'
+      }
+      timeStr = new Date(dateValue).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
     } catch(e) {
       timeStr = ""
     }

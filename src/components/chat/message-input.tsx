@@ -25,6 +25,8 @@ export function MessageInput({ conversationId }: MessageInputProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const emojiPickerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  const supabase = useRef(createClient()).current
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -37,6 +39,16 @@ export function MessageInput({ conversationId }: MessageInputProps) {
       document.removeEventListener("mousedown", handleClickOutside)
     }
   }, [])
+
+  // Subscribe to channel so we can broadcast events
+  useEffect(() => {
+    const channel = supabase.channel(`realtime:messages:${conversationId}`)
+    channel.subscribe()
+    channelRef.current = channel
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [conversationId, supabase])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -58,7 +70,6 @@ export function MessageInput({ conversationId }: MessageInputProps) {
     if ((!message.trim() && selectedFiles.length === 0) || isPending || isUploading) return
     
     setIsUploading(true)
-    const supabase = createClient()
     const attachments = []
 
     try {
@@ -92,6 +103,16 @@ export function MessageInput({ conversationId }: MessageInputProps) {
       setIsTyping(false)
       
       await sendMessage(conversationId, content, attachments)
+      
+      // Tell other clients in the channel to sync messages
+      if (channelRef.current) {
+        await channelRef.current.send({
+          type: 'broadcast',
+          event: 'sync_messages',
+          payload: { timestamp: Date.now() }
+        })
+      }
+      
       router.refresh()
     } catch (error) {
       console.error("Failed to send message or upload files", error)
