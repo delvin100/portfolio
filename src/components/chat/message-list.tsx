@@ -74,6 +74,9 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
         // Append optimistically so sender sees it instantly (0ms delay)
         return [...prev, optimisticMsg]
       })
+      setTimeout(() => {
+        virtuosoRef.current?.scrollToIndex({ index: 999999, align: 'end', behavior: 'smooth' })
+      }, 50)
     }
     window.addEventListener('local_optimistic_message', handleLocalOptimistic)
     return () => window.removeEventListener('local_optimistic_message', handleLocalOptimistic)
@@ -100,10 +103,9 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
             return [...prev, newMessage]
           })
           
-          // Pure client realtime: no router.refresh()! 
-          // We don't have the sender object on the payload.
-          // In a production app with this architecture, you'd fetch the sender here if needed.
-          // Since it's a 1-on-1 chat, we often know the sender visually already.
+          setTimeout(() => {
+            virtuosoRef.current?.scrollToIndex({ index: 999999, align: 'end', behavior: 'smooth' })
+          }, 50)
         }
       )
       .on(
@@ -125,6 +127,10 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
             // Append optimistically so receiver sees it instantly
             return [...prev, optimisticMsg]
           })
+          
+          setTimeout(() => {
+            virtuosoRef.current?.scrollToIndex({ index: 999999, align: 'end', behavior: 'smooth' })
+          }, 50)
         }
       )
       .on(
@@ -133,6 +139,12 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
         (payload) => {
           if (payload.payload.userId !== currentUserId) {
             setIsOtherUserTyping(payload.payload.isTyping)
+            // If they started typing, maybe scroll to bottom so we see the indicator
+            if (payload.payload.isTyping) {
+              setTimeout(() => {
+                virtuosoRef.current?.scrollToIndex({ index: 999999, align: 'end', behavior: 'smooth' })
+              }, 50)
+            }
           }
         }
       )
