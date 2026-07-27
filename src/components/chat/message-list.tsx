@@ -38,9 +38,20 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
           merged.push(msg)
           changed = true
         } else if (!merged[existingIndex].sender && msg.sender) {
-          // If we had an optimistic message (no sender) and now have the real one, replace it
+          // If we had an optimistic message and now have the real one, replace it
+          const wasRead = merged[existingIndex].isRead
           merged[existingIndex] = msg
+          // Never revert a read message back to unread due to stale server state
+          if (wasRead) {
+            merged[existingIndex].isRead = true
+          }
           changed = true
+        } else {
+          // If we already have the real message, check if its read status changed on the server
+          if (!merged[existingIndex].isRead && msg.isRead) {
+            merged[existingIndex].isRead = true
+            changed = true
+          }
         }
       }
       if (changed) {
@@ -143,7 +154,7 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
     }
   }, [conversationId, supabase, router, currentUserId])
 
-  // Mark messages as read and broadcast receipt
+  // Mark messages as read and broadcast receipt for local state
   useEffect(() => {
     const hasUnread = messages.some(m => !m.isRead && m.senderId !== currentUserId)
     if (hasUnread) {
@@ -168,6 +179,26 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
       })
     }
   }, [messages, conversationId, currentUserId, supabase])
+
+  // Fix DB race condition: if the server STILL thinks there are unread messages (because we marked them before they were inserted), mark them again!
+  useEffect(() => {
+    const hasUnreadOnServer = initialMessages.some(m => !m.isRead && m.senderId !== currentUserId)
+    if (hasUnreadOnServer) {
+      Promise.resolve().then(async () => {
+        try {
+          await markMessagesAsRead(conversationId)
+          const channel = supabase.channel(`realtime:messages:${conversationId}`)
+          channel.send({
+            type: 'broadcast',
+            event: 'read_receipt',
+            payload: { conversationId, readBy: currentUserId }
+          }).catch(console.error)
+        } catch (e) {
+          console.error("Failed to mark server messages as read:", e)
+        }
+      })
+    }
+  }, [initialMessages, conversationId, currentUserId, supabase])
 
   const loadMore = useCallback(async () => {
     if (!nextCursor || isLoadingMore) return
