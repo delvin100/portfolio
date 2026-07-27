@@ -66,12 +66,14 @@ export function MessageInput({ conversationId, currentUserId }: MessageInputProp
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
   }
 
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault()
     if ((!message.trim() && selectedFiles.length === 0) || isPending || isUploading) return
     
     setIsUploading(true)
-    const attachments = []
+    const attachments: { url: string; fileType: string; name: string }[] = []
 
     try {
       for (const file of selectedFiles) {
@@ -101,7 +103,17 @@ export function MessageInput({ conversationId, currentUserId }: MessageInputProp
       const content = message;
       setMessage("")
       setSelectedFiles([])
+      
+      // Clear typing indicator instantly
       setIsTyping(false)
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
+      if (channelRef.current) {
+        channelRef.current.send({
+          type: 'broadcast',
+          event: 'typing',
+          payload: { userId: currentUserId, isTyping: false }
+        }).catch(console.error)
+      }
       
       const messageId = crypto.randomUUID()
 
@@ -126,34 +138,65 @@ export function MessageInput({ conversationId, currentUserId }: MessageInputProp
         }).catch(console.error)
       }
       
-      // 3. Save to database
-      await sendMessage(conversationId, content, attachments, messageId)
+      // Turn off the loader instantly!
+      setIsUploading(false)
       
-      // 4. Tell other clients in the channel to sync messages to get the real DB record
-      if (channelRef.current) {
-        await channelRef.current.send({
-          type: 'broadcast',
-          event: 'sync_messages',
-          payload: { timestamp: Date.now() }
-        })
-      }
+      // 3. Save to database in the background (fire-and-forget)
+      Promise.resolve().then(async () => {
+        try {
+          await sendMessage(conversationId, content, attachments, messageId)
+          
+          // 4. Tell other clients in the channel to sync messages to get the real DB record
+          if (channelRef.current) {
+            await channelRef.current.send({
+              type: 'broadcast',
+              event: 'sync_messages',
+              payload: { timestamp: Date.now() }
+            })
+          }
+          
+          // 5. Update server state
+          router.refresh()
+        } catch (bgError) {
+          console.error("Background sync failed:", bgError)
+        }
+      })
       
-      // 5. Update server state
-      router.refresh()
     } catch (error) {
-      console.error("Failed to send message or upload files", error)
-      alert("Failed to send message or upload files. Make sure 'chat-attachments' bucket exists and is public in Supabase.")
-    } finally {
+      console.error("Failed to upload files", error)
+      alert("Failed to upload files. Make sure 'chat-attachments' bucket exists and is public in Supabase.")
       setIsUploading(false)
     }
   }
 
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value)
+    
     if (!isTyping) {
       setIsTyping(true)
-      // Broadcast typing indicator
+      if (channelRef.current) {
+        channelRef.current.send({
+          type: 'broadcast',
+          event: 'typing',
+          payload: { userId: currentUserId, isTyping: true }
+        }).catch(console.error)
+      }
     }
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current)
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false)
+      if (channelRef.current) {
+        channelRef.current.send({
+          type: 'broadcast',
+          event: 'typing',
+          payload: { userId: currentUserId, isTyping: false }
+        }).catch(console.error)
+      }
+    }, 2000)
   }
 
   return (
