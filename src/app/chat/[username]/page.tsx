@@ -58,7 +58,7 @@ export default async function ChatWindow(props: { params: Promise<{ username: st
       />
 
       {/* Input Area */}
-      <MessageInput conversationId={conversationId} />
+      <MessageInput conversationId={conversationId} currentUserId={user.id} />
     </div>
   )
 }

@@ -12,9 +12,10 @@ import { createClient } from "@/lib/supabase/client"
 
 interface MessageInputProps {
   conversationId: string
+  currentUserId: string
 }
 
-export function MessageInput({ conversationId }: MessageInputProps) {
+export function MessageInput({ conversationId, currentUserId }: MessageInputProps) {
   const [message, setMessage] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
@@ -102,9 +103,33 @@ export function MessageInput({ conversationId }: MessageInputProps) {
       setSelectedFiles([])
       setIsTyping(false)
       
-      await sendMessage(conversationId, content, attachments)
+      const messageId = crypto.randomUUID()
+
+      const optimisticMessage = {
+        id: messageId,
+        content,
+        conversationId,
+        createdAt: new Date().toISOString(),
+        attachments,
+        senderId: currentUserId, // Sender knows who they are, so isMe will be true!
+      }
+
+      // 1. Dispatch locally so the sender's UI updates instantly (0ms delay)
+      window.dispatchEvent(new CustomEvent('local_optimistic_message', { detail: optimisticMessage }))
+
+      // 2. Broadcast optimistically to the receiver before hitting the database
+      if (channelRef.current) {
+        channelRef.current.send({
+          type: 'broadcast',
+          event: 'optimistic_message',
+          payload: optimisticMessage
+        }).catch(console.error)
+      }
       
-      // Tell other clients in the channel to sync messages
+      // 3. Save to database
+      await sendMessage(conversationId, content, attachments, messageId)
+      
+      // 4. Tell other clients in the channel to sync messages to get the real DB record
       if (channelRef.current) {
         await channelRef.current.send({
           type: 'broadcast',
@@ -113,6 +138,7 @@ export function MessageInput({ conversationId }: MessageInputProps) {
         })
       }
       
+      // 5. Update server state
       router.refresh()
     } catch (error) {
       console.error("Failed to send message or upload files", error)

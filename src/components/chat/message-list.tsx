@@ -32,8 +32,13 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
       const merged = [...prev]
       let changed = false
       for (const msg of initialMessages) {
-        if (!merged.some(m => m.id === msg.id)) {
+        const existingIndex = merged.findIndex(m => m.id === msg.id)
+        if (existingIndex === -1) {
           merged.push(msg)
+          changed = true
+        } else if (!merged[existingIndex].sender && msg.sender) {
+          // If we had an optimistic message (no sender) and now have the real one, replace it
+          merged[existingIndex] = msg
           changed = true
         }
       }
@@ -48,7 +53,21 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
     })
   }, [initialMessages])
 
-  // Realtime subscription for incoming messages
+  // Listen for local optimistic messages (from our own MessageInput)
+  useEffect(() => {
+    const handleLocalOptimistic = (e: any) => {
+      const optimisticMsg = e.detail
+      setMessages((prev) => {
+        if (prev.some(m => m.id === optimisticMsg.id)) return prev
+        // Append optimistically so sender sees it instantly (0ms delay)
+        return [...prev, optimisticMsg]
+      })
+    }
+    window.addEventListener('local_optimistic_message', handleLocalOptimistic)
+    return () => window.removeEventListener('local_optimistic_message', handleLocalOptimistic)
+  }, [])
+
+  // Listen to realtime messages via Supabase broadcasts
   useEffect(() => {
     const channel = supabase
       .channel(`realtime:messages:${conversationId}`)
@@ -82,6 +101,18 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
           // Received a manual broadcast to sync messages!
           // This ensures the receiver fetches the latest messages even if postgres_changes fails.
           router.refresh()
+        }
+      )
+      .on(
+        'broadcast',
+        { event: 'optimistic_message' },
+        (payload) => {
+          const optimisticMsg = payload.payload
+          setMessages((prev) => {
+            if (prev.some(m => m.id === optimisticMsg.id)) return prev
+            // Append optimistically so receiver sees it instantly
+            return [...prev, optimisticMsg]
+          })
         }
       )
       .subscribe()

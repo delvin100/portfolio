@@ -237,7 +237,8 @@ export async function getMessages(conversationId: string, cursor?: string, limit
 export async function sendMessage(
   conversationId: string, 
   content: string,
-  attachments?: { url: string; fileType: string; name: string }[]
+  attachments?: { url: string; fileType: string; name: string }[],
+  messageId?: string
 ) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -252,6 +253,7 @@ export async function sendMessage(
 
   const message = await prisma.message.create({
     data: {
+      id: messageId || undefined,
       content: content ? content.trim() : "",
       conversationId,
       senderId: user.id,
