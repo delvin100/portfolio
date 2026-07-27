@@ -43,24 +43,33 @@ export async function updateSession(request: NextRequest) {
   const isChatRoute = request.nextUrl.pathname.startsWith('/chat') && !request.nextUrl.pathname.startsWith('/chat-')
   const isLoginRoute = request.nextUrl.pathname === '/chat-login' || request.nextUrl.pathname === '/chat-register'
 
-  if (isAdminRoute && !user) {
-    // Admin login is still at /login
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
+  const adminEmail = 'delvinvarghese2028@mca.ajce.in'
+
+  if (isAdminRoute) {
+    if (!user) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+    if (user.email !== adminEmail) {
+      // Normal chat users cannot access the portfolio admin
+      const url = request.nextUrl.clone()
+      url.pathname = '/chat'
+      return NextResponse.redirect(url)
+    }
   }
 
   if (isChatRoute && !user) {
-    // no user, potentially respond by redirecting the user to the chat login page
+    // no user, redirect to chat login
     const url = request.nextUrl.clone()
     url.pathname = '/chat-login'
     return NextResponse.redirect(url)
   }
 
   if (isLoginRoute && user) {
-    // user is already logged in, redirect to chat
+    // Redirect based on which type of user they are
     const url = request.nextUrl.clone()
-    url.pathname = '/chat'
+    url.pathname = user.email === adminEmail ? '/admin' : '/chat'
     return NextResponse.redirect(url)
   }
 

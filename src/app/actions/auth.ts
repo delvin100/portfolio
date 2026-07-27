@@ -22,10 +22,17 @@ export async function login(formData: FormData) {
 
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email: parsed.data.email,
-    password: parsed.data.password,
-  })
+  let error;
+  try {
+    const response = await supabase.auth.signInWithPassword({
+      email: parsed.data.email,
+      password: parsed.data.password,
+    })
+    error = response.error;
+  } catch (err: any) {
+    console.error("Admin Login exception:", err);
+    return { error: "Network or server error during login. Please try again." }
+  }
 
   if (error) {
     return { error: error.message }

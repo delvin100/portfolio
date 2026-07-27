@@ -18,7 +18,12 @@ export async function login(prevState: ActionState, formData: FormData): Promise
   
   // Ensure the prefix is valid for an email (no spaces or weird characters)
   const safeEmailPrefix = username.replace(/[^a-z0-9_.-]/g, '')
-  const email = `${safeEmailPrefix}@example.com`
+  let email = `${safeEmailPrefix}@example.com`
+
+  // If the admin logs in through the chat, route it to their real email
+  if (username === 'delvin') {
+    email = 'delvinvarghese2028@mca.ajce.in'
+  }
 
   const data = {
     email,

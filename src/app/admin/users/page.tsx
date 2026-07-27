@@ -9,6 +9,11 @@ import { EditUserButton } from './edit-user-button'
 
 export default async function AdminUsersPage() {
   const users = await prisma.user.findMany({
+    where: {
+      username: {
+        not: 'portfolio_admin'
+      }
+    },
     orderBy: { createdAt: 'desc' }
   })
 

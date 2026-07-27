@@ -29,17 +29,23 @@ export async function searchUsers(query: string) {
   if (!dbUser) {
     // Self-heal: Create user if they exist in Supabase but not Prisma
     const defaultUsername = user.email ? user.email.split('@')[0] : `user_${user.id.substring(0, 5)}`
-    dbUser = await prisma.user.create({
-      data: {
-        id: user.id,
-        name: defaultUsername,
-        username: defaultUsername,
-        status: 'Online'
-      }
-    })
+    try {
+      dbUser = await prisma.user.create({
+        data: {
+          id: user.id,
+          name: defaultUsername,
+          username: defaultUsername,
+          status: 'Online'
+        }
+      })
+    } catch (e) {
+      console.error("Prisma create failed in searchUsers:", e)
+      // fallback to basic object to prevent crash
+      dbUser = { id: user.id, username: defaultUsername, name: defaultUsername, status: 'Online' } as any
+    }
   }
   
-  if (dbUser.username !== ADMIN_USERNAME) {
+  if (!dbUser || dbUser.username !== ADMIN_USERNAME) {
     return [] // Non-admins cannot search
   }
 
@@ -78,17 +84,22 @@ export async function startConversation(targetUserId: string) {
   if (!dbUser) {
     // Self-heal: Create user if they exist in Supabase but not Prisma
     const defaultUsername = user.email ? user.email.split('@')[0] : `user_${user.id.substring(0, 5)}`
-    dbUser = await prisma.user.create({
-      data: {
-        id: user.id,
-        name: defaultUsername,
-        username: defaultUsername,
-        status: 'Online'
-      }
-    })
+    try {
+      dbUser = await prisma.user.create({
+        data: {
+          id: user.id,
+          name: defaultUsername,
+          username: defaultUsername,
+          status: 'Online'
+        }
+      })
+    } catch (e) {
+      console.error("Prisma create failed in startConversation:", e)
+      dbUser = { id: user.id, username: defaultUsername, name: defaultUsername, status: 'Online' } as any
+    }
   }
 
-  const isAdmin = dbUser.username === ADMIN_USERNAME
+  const isAdmin = dbUser?.username === ADMIN_USERNAME
 
   // If not admin, they can ONLY start a conversation with the admin
   if (!isAdmin) {
@@ -286,15 +297,19 @@ export async function getUserConversations() {
 
   if (!dbUser) {
     const defaultUsername = user.email ? user.email.split('@')[0] : `user_${user.id.substring(0, 5)}`
-    await prisma.user.create({
-      data: {
-        id: user.id,
-        name: defaultUsername,
-        username: defaultUsername,
-        status: 'Online'
-      }
-    })
-    return [] // Return empty conversations for newly created user
+    try {
+      await prisma.user.create({
+        data: {
+          id: user.id,
+          name: defaultUsername,
+          username: defaultUsername,
+          status: 'Online'
+        }
+      })
+    } catch (e) {
+      console.error("Prisma create failed in getUserConversations:", e)
+    }
+    return [] // Return empty conversations for newly created user or failed creation
   }
 
   const conversations = (dbUser?.conversations || [])
