@@ -21,6 +21,7 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
   const [messages, setMessages] = useState(initialMessages)
   const [nextCursor, setNextCursor] = useState(initialNextCursor)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [isOtherUserTyping, setIsOtherUserTyping] = useState(false)
   const router = useRouter()
   
   // Memoize supabase client
@@ -113,6 +114,15 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
             // Append optimistically so receiver sees it instantly
             return [...prev, optimisticMsg]
           })
+        }
+      )
+      .on(
+        'broadcast',
+        { event: 'typing' },
+        (payload) => {
+          if (payload.payload.userId !== currentUserId) {
+            setIsOtherUserTyping(payload.payload.isTyping)
+          }
         }
       )
       .subscribe()
@@ -252,6 +262,25 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
                 ) : !nextCursor ? (
                   <span className="text-xs text-muted-foreground">Beginning of conversation</span>
                 ) : null}
+              </div>
+            ),
+            Footer: () => (
+              <div className="py-2">
+                {isOtherUserTyping && (
+                  <div className="flex justify-start animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="flex max-w-[75%] md:max-w-[65%] flex-row gap-2">
+                      <Avatar className="h-8 w-8 mt-auto hidden md:block">
+                        <AvatarFallback>?</AvatarFallback>
+                      </Avatar>
+                      <div className="bg-card border border-border/40 rounded-2xl rounded-bl-sm p-4 shadow-sm flex items-center gap-1.5 h-[42px]">
+                        <span className="w-1.5 h-1.5 bg-foreground/50 rounded-full animate-bounce"></span>
+                        <span className="w-1.5 h-1.5 bg-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }}></span>
+                        <span className="w-1.5 h-1.5 bg-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {!isOtherUserTyping && <div className="h-2" />}
               </div>
             )
           }}
