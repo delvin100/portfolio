@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState, useCallback } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Check, CheckCheck, Loader2, MessageSquareDashed, Paperclip } from "lucide-react"
+import { Bookmark, Check, CheckCheck, Loader2, MessageSquareDashed, Paperclip } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
-import { getMessages, markMessagesAsRead } from "@/actions/chat"
+import { getMessages, markMessagesAsRead, toggleMessageSaved } from "@/actions/chat"
 import { getInitials } from "@/lib/utils"
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso"
 import { useRouter } from "next/navigation"
@@ -150,6 +150,16 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
       )
       .on(
         'broadcast',
+        { event: 'message_saved' },
+        (payload) => {
+          const { messageId, isSaved } = payload.payload
+          setMessages((prev) => prev.map(m => 
+            m.id === messageId ? { ...m, isSaved } : m
+          ))
+        }
+      )
+      .on(
+        'broadcast',
         { event: 'read_receipt' },
         (payload) => {
           if (payload.payload.readBy !== currentUserId) {
@@ -231,6 +241,27 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
     }
   }, [nextCursor, isLoadingMore, conversationId])
 
+  const handleToggleSave = async (messageId: string, isSaved: boolean) => {
+    // Optimistic update
+    setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isSaved } : m))
+
+    // Broadcast the change to the other user
+    const channel = supabase.channel(`realtime:messages:${conversationId}`)
+    channel.send({
+      type: 'broadcast',
+      event: 'message_saved',
+      payload: { messageId, isSaved }
+    }).catch(console.error)
+
+    try {
+      await toggleMessageSaved(messageId, isSaved)
+    } catch (e) {
+      console.error("Failed to toggle save state:", e)
+      // Revert on failure
+      setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isSaved: !isSaved } : m))
+    }
+  }
+
   const renderMessage = (index: number, msg: any) => {
     const isMe = msg.senderId === currentUserId
     const fallback = getInitials(msg.sender?.name)
@@ -257,41 +288,50 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
             </Avatar>
           )}
           
-          <div className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
-            <div 
-              className={`px-4 py-2.5 rounded-2xl shadow-sm ${
-                isMe 
-                  ? "bg-gradient-to-br from-indigo-600 to-indigo-500 text-white rounded-br-sm shadow-indigo-900/20" 
-                  : "bg-card border border-border/40 rounded-bl-sm text-card-foreground shadow-black/5"
-              }`}
-            >
-              {msg.attachments && msg.attachments.length > 0 && (
-                <div className={`flex flex-col gap-2 ${msg.content ? 'mb-3' : ''}`}>
-                  {msg.attachments.map((att: any, i: number) => (
-                    att.fileType?.startsWith('image/') ? (
-                      <a key={i} href={att.url} target="_blank" rel="noopener noreferrer" className="block relative rounded-lg overflow-hidden border border-white/10 max-w-xs sm:max-w-sm">
-                        <img src={att.url} alt={att.name} className="w-full h-auto max-h-64 object-cover hover:scale-105 transition-transform duration-500" />
-                      </a>
-                    ) : (
-                      <a 
-                        key={i} 
-                        href={att.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-2.5 rounded-xl bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 transition-colors border border-white/5"
-                      >
-                        <div className="h-10 w-10 shrink-0 bg-background/50 rounded-lg flex items-center justify-center text-current">
-                          <Paperclip className="h-5 w-5" />
-                        </div>
-                        <span className="text-sm font-medium truncate max-w-[150px] sm:max-w-[200px]">{att.name}</span>
-                      </a>
-                    )
-                  ))}
-                </div>
-              )}
-              {msg.content && (
-                <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</p>
-              )}
+          <div className={`flex flex-col ${isMe ? "items-end" : "items-start"} max-w-full overflow-hidden`}>
+            <div className={`group relative flex items-center gap-2 ${isMe ? "flex-row" : "flex-row-reverse"}`}>
+              <button 
+                onClick={() => handleToggleSave(msg.id, !msg.isSaved)}
+                className={`opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5 ${msg.isSaved ? 'opacity-100 text-amber-500 hover:text-amber-600' : 'text-muted-foreground'} flex-shrink-0`}
+                title={msg.isSaved ? "Unsave message" : "Save message"}
+              >
+                <Bookmark className={`h-4 w-4 ${msg.isSaved ? "fill-current" : ""}`} />
+              </button>
+              <div 
+                className={`px-4 py-2.5 rounded-2xl shadow-sm ${
+                  isMe 
+                    ? "bg-gradient-to-br from-indigo-600 to-indigo-500 text-white rounded-br-sm shadow-indigo-900/20" 
+                    : "bg-card border border-border/40 rounded-bl-sm text-card-foreground shadow-black/5"
+                }`}
+              >
+                {msg.attachments && msg.attachments.length > 0 && (
+                  <div className={`flex flex-col gap-2 ${msg.content ? 'mb-3' : ''}`}>
+                    {msg.attachments.map((att: any, i: number) => (
+                      att.fileType?.startsWith('image/') ? (
+                        <a key={i} href={att.url} target="_blank" rel="noopener noreferrer" className="block relative rounded-lg overflow-hidden border border-white/10 max-w-xs sm:max-w-sm">
+                          <img src={att.url} alt={att.name} className="w-full h-auto max-h-64 object-cover hover:scale-105 transition-transform duration-500" />
+                        </a>
+                      ) : (
+                        <a 
+                          key={i} 
+                          href={att.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-2.5 rounded-xl bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 transition-colors border border-white/5"
+                        >
+                          <div className="h-10 w-10 shrink-0 bg-background/50 rounded-lg flex items-center justify-center text-current">
+                            <Paperclip className="h-5 w-5" />
+                          </div>
+                          <span className="text-sm font-medium truncate max-w-[150px] sm:max-w-[200px]">{att.name}</span>
+                        </a>
+                      )
+                    ))}
+                  </div>
+                )}
+                {msg.content && (
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</p>
+                )}
+              </div>
             </div>
             
             <div className="flex items-center gap-1 mt-1 px-1">

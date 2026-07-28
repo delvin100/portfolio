@@ -4,6 +4,58 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 
+async function cleanupOldMessages() {
+  try {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+    
+    // Find messages to delete
+    const messagesToDelete = await prisma.message.findMany({
+      where: {
+        isSaved: false,
+        createdAt: { lt: twentyFourHoursAgo }
+      },
+      include: {
+        attachments: true
+      }
+    })
+
+    if (messagesToDelete.length === 0) return;
+
+    // Extract attachment filenames from URLs
+    const attachmentPaths: string[] = []
+    messagesToDelete.forEach(msg => {
+      msg.attachments.forEach(att => {
+        if (att.url) {
+          const fileName = att.url.split('/').pop()
+          if (fileName) {
+            attachmentPaths.push(fileName)
+          }
+        }
+      })
+    })
+
+    // Delete files from Supabase Storage if any
+    if (attachmentPaths.length > 0) {
+      const supabase = await createClient()
+      const { error } = await supabase.storage
+        .from('chat-attachments')
+        .remove(attachmentPaths)
+      if (error) {
+        console.error("Error deleting attachments from storage:", error)
+      }
+    }
+
+    // Delete messages from DB (cascades to Attachment rows)
+    const messageIds = messagesToDelete.map(m => m.id)
+    await prisma.message.deleteMany({
+      where: { id: { in: messageIds } }
+    })
+    console.log(`Cleaned up ${messageIds.length} old messages.`)
+  } catch (e) {
+    console.error("Error cleaning up old messages:", e)
+  }
+}
+
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'delvin'
 
 export async function getAdminUser() {
@@ -205,6 +257,9 @@ export async function getMessages(conversationId: string, cursor?: string, limit
     throw new Error("Unauthorized")
   }
 
+  // Run lazy deletion
+  await cleanupOldMessages()
+
   const messages = await prisma.message.findMany({
     where: { conversationId },
     orderBy: { createdAt: 'desc' },
@@ -274,6 +329,9 @@ export async function getUserConversations() {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) return []
+
+  // Run lazy deletion
+  await cleanupOldMessages()
 
   let dbUser = await prisma.user.findUnique({
     where: { id: user.id },
@@ -375,4 +433,20 @@ export async function markMessagesAsRead(conversationId: string) {
       isRead: true
     }
   })
+}
+
+export async function toggleMessageSaved(messageId: string, isSaved: boolean) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error("Unauthorized")
+  }
+
+  const message = await prisma.message.update({
+    where: { id: messageId },
+    data: { isSaved }
+  })
+
+  return message
 }
