@@ -20,7 +20,13 @@ async function getStats() {
     supabase.from('skills').select('*', { count: 'exact', head: true }),
     supabase.from('experience').select('*', { count: 'exact', head: true }),
     supabase.from('certifications').select('*', { count: 'exact', head: true }),
-    prisma.user.count({ where: { username: { not: 'portfolio_admin' } } }),
+    prisma.user.count({ 
+      where: { 
+        username: { 
+          notIn: ['portfolio_admin', process.env.ADMIN_USERNAME || 'delvin'] 
+        } 
+      } 
+    }),
     // @ts-ignore - Prisma client needs regeneration
     prisma.pageView.count(),
   ])

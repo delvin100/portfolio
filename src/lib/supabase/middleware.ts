@@ -54,23 +54,27 @@ export async function updateSession(request: NextRequest) {
     if (user.email !== adminEmail) {
       // Normal chat users cannot access the portfolio admin
       const url = request.nextUrl.clone()
-      url.pathname = '/chat'
+      url.pathname = '/login'
       return NextResponse.redirect(url)
     }
   }
 
-  if (isChatRoute && !user) {
-    // no user, redirect to chat login
-    const url = request.nextUrl.clone()
-    url.pathname = '/chat-login'
-    return NextResponse.redirect(url)
+  if (isChatRoute) {
+    if (!user || user.email === adminEmail) {
+      // no user or user is admin, redirect to chat login
+      const url = request.nextUrl.clone()
+      url.pathname = '/chat-login'
+      return NextResponse.redirect(url)
+    }
   }
 
   if (isLoginRoute && user) {
-    // Redirect based on which type of user they are
-    const url = request.nextUrl.clone()
-    url.pathname = user.email === adminEmail ? '/admin' : '/chat'
-    return NextResponse.redirect(url)
+    // Normal users get redirected to chat. Admin stays on chat-login (as requested)
+    if (user.email !== adminEmail) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/chat'
+      return NextResponse.redirect(url)
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're

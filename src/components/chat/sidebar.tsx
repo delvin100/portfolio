@@ -8,15 +8,18 @@ import { Button } from "@/components/ui/button"
 import { searchUsers, getUserConversations } from "@/actions/chat"
 import { logout } from "@/actions/auth"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuGroup,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { updateUserSettings } from "@/actions/settings"
 import { getInitials } from "@/lib/utils"
 
 import { createClient } from "@/lib/supabase/client"
@@ -35,10 +38,31 @@ export function ChatSidebar({ initialConversations, currentUser, isAdmin = false
   const [isSearching, setIsSearching] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [conversations, setConversations] = useState(initialConversations)
+  
+  // Settings modal state
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isSavingSettings, startSavingSettings] = useTransition()
+  const [settingsError, setSettingsError] = useState<string | null>(null)
+  
   const router = useRouter()
   const { onlineUsers } = usePresence()
   
   const supabase = useRef(createClient()).current
+
+  const handleUpdateSettings = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setSettingsError(null)
+    const formData = new FormData(e.currentTarget)
+    startSavingSettings(async () => {
+      const result = await updateUserSettings({}, formData)
+      if (result.error) {
+        setSettingsError(result.error)
+      } else {
+        setIsSettingsOpen(false)
+        router.refresh()
+      }
+    })
+  }
   
   // Listen for ANY message to update the sidebar
   useEffect(() => {
@@ -83,13 +107,14 @@ export function ChatSidebar({ initialConversations, currentUser, isAdmin = false
 
   const handleStartChat = (username: string) => {
     startTransition(() => {
-      router.push(`/chat/${username}`)
+      const basePath = isAdmin ? '/admin/chats' : '/chat'
+      router.push(`${basePath}/${username}`)
       setSearchQuery("")
     })
   }
 
   return (
-    <div className="w-full md:w-[350px] lg:w-[400px] flex flex-col h-[calc(100vh-4rem)] bg-transparent">
+    <div className="w-full flex flex-col h-full bg-transparent">
       {/* Header */}
       <div className="p-4 border-b border-border/40 flex items-center justify-between bg-black/10">
         <div className="flex items-center gap-3">
@@ -100,38 +125,73 @@ export function ChatSidebar({ initialConversations, currentUser, isAdmin = false
           <span className="font-semibold">{currentUser?.name || "My Chats"}</span>
         </div>
         <div className="flex items-center gap-1.5 bg-black/10 dark:bg-white/5 p-1 rounded-full border border-black/5 dark:border-white/5 shadow-inner backdrop-blur-md">
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors">
-            <Edit className="h-4 w-4" strokeWidth={2.5} />
-          </Button>
-          <div className="w-px h-4 bg-border/50 mx-0.5"></div>
-          <DropdownMenu>
-            <DropdownMenuTrigger render={
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors">
-                <MoreVertical className="h-4 w-4" strokeWidth={2.5} />
+          <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+            <DialogTrigger render={
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors"
+                title="Edit Profile"
+              />
+            }>
+              <Edit className="h-4 w-4" strokeWidth={2.5} />
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px] bg-background/95 backdrop-blur-xl border-white/10">
+              <DialogHeader>
+                <DialogTitle>Edit Profile</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleUpdateSettings} className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input 
+                    id="name" 
+                    name="name" 
+                    defaultValue={currentUser?.name || ""} 
+                    required 
+                    className="bg-black/10 border-white/10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username</Label>
+                  <Input 
+                    id="username" 
+                    name="username" 
+                    defaultValue={currentUser?.username || ""} 
+                    required 
+                    className="bg-black/10 border-white/10"
+                  />
+                </div>
+                
+                {settingsError && (
+                  <div className="text-sm text-destructive">{settingsError}</div>
+                )}
+                
+                <DialogFooter className="pt-4">
+                  <DialogClose render={<Button type="button" variant="ghost" />}>
+                    Cancel
+                  </DialogClose>
+                  <Button type="submit" disabled={isSavingSettings}>
+                    {isSavingSettings && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save Changes
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+          {!isAdmin && (
+            <>
+              <div className="w-px h-4 bg-border/50 mx-0.5"></div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground hover:text-red-500 transition-colors"
+                onClick={() => startTransition(() => { logout() })}
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4" strokeWidth={2.5} />
               </Button>
-            } />
-            <DropdownMenuContent align="end" className="w-48 bg-background/80 backdrop-blur-xl border-white/10 shadow-2xl rounded-xl">
-              <DropdownMenuGroup>
-                <DropdownMenuLabel className="font-semibold text-foreground/80">My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-border/50" />
-                <DropdownMenuItem 
-                  className="focus:bg-primary/10 focus:text-primary rounded-lg cursor-pointer transition-colors"
-                  onClick={() => router.push('/chat/settings')}
-                >
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-border/50" />
-                <DropdownMenuItem 
-                  className="text-red-500 hover:text-red-600 focus:text-red-500 focus:bg-red-500/10 cursor-pointer rounded-lg transition-colors"
-                  onClick={() => logout()}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Logout</span>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </>
+          )}
         </div>
       </div>
 
@@ -214,7 +274,10 @@ export function ChatSidebar({ initialConversations, currentUser, isAdmin = false
             conversations.map((chat) => (
               <div
                 key={chat.id}
-                onClick={() => router.push(`/chat/${chat.username}`)}
+                onClick={() => {
+                  const basePath = isAdmin ? '/admin/chats' : '/chat'
+                  router.push(`${basePath}/${chat.username}`)
+                }}
                 className="flex items-center gap-3 p-3 hover:bg-white/5 cursor-pointer transition-all border-b border-border/20 m-1 rounded-lg"
               >
                 <div className="relative">

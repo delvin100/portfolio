@@ -8,10 +8,12 @@ import { DeleteUserButton } from './delete-user-button'
 import { EditUserButton } from './edit-user-button'
 
 export default async function AdminUsersPage() {
+  const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'delvin'
+
   const users = await prisma.user.findMany({
     where: {
       username: {
-        not: 'portfolio_admin'
+        notIn: ['portfolio_admin', ADMIN_USERNAME]
       }
     },
     orderBy: { createdAt: 'desc' }

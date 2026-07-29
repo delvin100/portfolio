@@ -2,16 +2,6 @@
 
 import { useEffect, useState, useRef } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { MoreVertical, LogOut, Settings } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import Link from "next/link"
-import { logout } from "@/actions/auth"
 import { usePresence } from "@/components/chat/presence-provider"
 import { getInitials } from "@/lib/utils"
 
@@ -62,25 +52,7 @@ export function ChatHeader({ otherUser }: ChatHeaderProps) {
       </div>
       
       <div className="flex items-center gap-1.5 bg-black/10 dark:bg-white/5 p-1 rounded-full border border-black/5 dark:border-white/5 shadow-inner backdrop-blur-md">
-        <form action={logout}>
-          <Button variant="ghost" size="icon" type="submit" title="Logout" className="h-9 w-9 rounded-full text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all duration-300 hover:shadow-[0_0_12px_rgba(239,68,68,0.2)]">
-            <LogOut className="h-4 w-4" strokeWidth={2.5} />
-          </Button>
-        </form>
-        
-        <DropdownMenu>
-          <DropdownMenuTrigger className="inline-flex items-center justify-center shrink-0 h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10 transition-all duration-300 focus-visible:ring-0">
-            <MoreVertical className="h-4 w-4" strokeWidth={2.5} />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 z-50 rounded-xl border-white/10 bg-card/80 backdrop-blur-xl shadow-2xl">
-            <DropdownMenuItem render={
-              <Link href="/chat/settings" className="flex items-center w-full px-2 py-2 cursor-pointer text-sm font-medium transition-colors hover:text-indigo-400">
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
-              </Link>
-            } />
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Actions moved to Sidebar */}
       </div>
     </div>
   )

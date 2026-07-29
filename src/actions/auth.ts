@@ -20,9 +20,9 @@ export async function login(prevState: ActionState, formData: FormData): Promise
   const safeEmailPrefix = username.replace(/[^a-z0-9_.-]/g, '')
   let email = `${safeEmailPrefix}@example.com`
 
-  // If the admin logs in through the chat, route it to their real email
-  if (username === 'delvin') {
-    email = 'delvinvarghese2028@mca.ajce.in'
+  // Block admin from logging in through the chat login page
+  if (username === 'delvin' || username === process.env.ADMIN_USERNAME) {
+    return { error: 'Please use the admin login page to access your account.' }
   }
 
   const data = {

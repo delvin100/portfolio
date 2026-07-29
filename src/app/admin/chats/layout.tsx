@@ -2,20 +2,19 @@ import { ChatSidebar } from "@/components/chat/sidebar"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Chat | Portfolio",
-  description: "Real-time chat application",
+  title: "Admin Chats | Portfolio",
+  description: "Admin chat management",
 }
 
 import { createClient } from "@/lib/supabase/server"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
-import { getAdminUser } from "@/actions/chat"
 import { PresenceProvider } from "@/components/chat/presence-provider"
 import { ChatLayoutClient } from "@/components/chat/chat-layout-client"
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'delvin'
 
-export default async function ChatLayout({
+export default async function AdminChatsLayout({
   children,
 }: {
   children: React.ReactNode
@@ -24,7 +23,7 @@ export default async function ChatLayout({
   const { data: { user }, error } = await supabase.auth.getUser()
 
   if (error || !user) {
-    redirect('/chat-login')
+    redirect('/login')
   }
 
   // Fetch the current user for the sidebar header
@@ -32,23 +31,25 @@ export default async function ChatLayout({
     where: { id: user.id },
   })
 
-  // Fetch and format conversations using the shared server action (which handles filtering)
+  // Ensure user is admin
+  if (dbUser?.username !== ADMIN_USERNAME) {
+    redirect('/')
+  }
+
+  // Fetch and format conversations
   const { getUserConversations } = await import('@/actions/chat');
   const conversations = await getUserConversations();
 
-  const isAdmin = dbUser?.username === ADMIN_USERNAME;
-  const adminUser = !isAdmin ? await getAdminUser() : null;
-
-  const sidebarContent = isAdmin ? (
-    <div className="hidden md:block border-r border-border/40 relative z-10 bg-background/40 backdrop-blur-md h-full w-[350px] lg:w-[400px]">
+  const sidebarContent = (
+    <div className="hidden md:block border-r border-border/40 relative z-10 bg-background/40 backdrop-blur-md h-full w-[300px]">
       <ChatSidebar 
         initialConversations={conversations} 
         currentUser={dbUser} 
-        isAdmin={isAdmin}
-        adminUser={adminUser}
+        isAdmin={true}
+        adminUser={null}
       />
     </div>
-  ) : null
+  )
 
   return (
     <PresenceProvider currentUserId={user.id}>
