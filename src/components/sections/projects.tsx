@@ -168,11 +168,6 @@ export function ProjectsSection({ projects }: { projects: Project[] }) {
                     <div className="flex flex-wrap items-center gap-6">
                       {project.live_url && (
                         <div className="relative">
-                          <motion.div 
-                            animate={{ scale: [1, 1.25], opacity: [0.4, 0] }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "easeOut" }}
-                            className="absolute inset-0 rounded-full border-2 border-white/40 pointer-events-none group-hover:border-primary/50"
-                          />
                           <a 
                             href={project.live_url} 
                             target="_blank" 

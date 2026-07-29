@@ -1,0 +1,71 @@
+---
+title: "git fork"
+description: "Create a personal copy of another repository."
+category: "Repository"
+difficulty: "Beginner"
+tags: ["fork", "remote", "open-source"]
+order: 3
+---
+
+A **fork** is a personal copy of someone else's repository. While technically a feature of Git hosting platforms rather than a core CLI command, it is an essential part of the Git workflow.
+
+## Why Use It
+
+1. **Open Source Contributions:** You cannot push code to a repository where you don't have write access. To contribute, you fork the repository, make your changes on your copy, and then submit a **Pull Request** to the original project.
+2. **Experimentation:** A fork allows you to freely experiment with changes without affecting the original project. If things go wrong, you can safely delete your fork.
+3. **Starting Point:** You can fork a project to use it as a starting point for your own completely separate project.
+
+## How to Fork
+
+1. Navigate to the repository you want to fork on your Git hosting platform.
+2. Click the **Fork** button (usually in the top-right corner).
+3. Select your account as the destination.
+
+A copy of the repository will be created under your account.
+
+## The Fork Workflow
+
+Once you have forked a repository, you interact with it using standard Git commands:
+
+1. **Clone your fork:**
+   ```bash
+   git clone <your-fork-url>
+   ```
+
+2. **Make changes and commit them:**
+   ```bash
+   git commit -m "Add new feature"
+   ```
+
+3. **Push back to YOUR fork:**
+   ```bash
+   git push origin main
+   ```
+
+4. **Submit a Pull Request** to ask the original authors to merge your changes.
+
+## Syncing a Fork (Keeping it Up to Date)
+
+The most common issue when working with forks is that the original repository (often called **upstream**) continues to receive updates from other people. Your fork does **not** update automatically. 
+
+To keep your fork in sync with the original project, you must link them together:
+
+1. **Add the original repository as an 'upstream' remote:**
+   ```bash
+   git remote add upstream <original-repository-url>
+   ```
+
+2. **Fetch the latest changes from the original repository:**
+   ```bash
+   git fetch upstream
+   ```
+
+3. **Merge those changes into your local branch:**
+   ```bash
+   git merge upstream/main
+   ```
+
+4. **Push the updated code back to your fork:**
+   ```bash
+   git push origin main
+   ```
