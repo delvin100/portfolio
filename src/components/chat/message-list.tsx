@@ -82,6 +82,8 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
     return () => window.removeEventListener('local_optimistic_message', handleLocalOptimistic)
   }, [])
 
+  const channelRef = useRef<any>(null)
+
   // Listen to realtime messages via Supabase broadcasts
   useEffect(() => {
     const channel = supabase
@@ -112,8 +114,6 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
         'broadcast',
         { event: 'sync_messages' },
         (payload) => {
-          // Received a manual broadcast to sync messages!
-          // This ensures the receiver fetches the latest messages even if postgres_changes fails.
           router.refresh()
         }
       )
@@ -124,10 +124,8 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
           const optimisticMsg = payload.payload
           setMessages((prev) => {
             if (prev.some(m => m.id === optimisticMsg.id)) return prev
-            // Append optimistically so receiver sees it instantly
             return [...prev, optimisticMsg]
           })
-          
           setTimeout(() => {
             virtuosoRef.current?.scrollToIndex({ index: 999999, align: 'end', behavior: 'smooth' })
           }, 50)
@@ -139,7 +137,6 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
         (payload) => {
           if (payload.payload.userId !== currentUserId) {
             setIsOtherUserTyping(payload.payload.isTyping)
-            // If they started typing, maybe scroll to bottom so we see the indicator
             if (payload.payload.isTyping) {
               setTimeout(() => {
                 virtuosoRef.current?.scrollToIndex({ index: 999999, align: 'end', behavior: 'smooth' })
@@ -169,9 +166,14 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
           }
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          channelRef.current = channel
+        }
+      })
 
     return () => {
+      channelRef.current = null
       supabase.removeChannel(channel)
     }
   }, [conversationId, supabase, router, currentUserId])
@@ -184,12 +186,13 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
         try {
           await markMessagesAsRead(conversationId)
           // Broadcast read receipt
-          const channel = supabase.channel(`realtime:messages:${conversationId}`)
-          channel.send({
-            type: 'broadcast',
-            event: 'read_receipt',
-            payload: { conversationId, readBy: currentUserId }
-          }).catch(console.error)
+          if (channelRef.current) {
+            channelRef.current.send({
+              type: 'broadcast',
+              event: 'read_receipt',
+              payload: { conversationId, readBy: currentUserId }
+            }).catch(console.error)
+          }
           
           // Optimistically update our own state
           setMessages(prev => prev.map(m => 
@@ -209,12 +212,13 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
       Promise.resolve().then(async () => {
         try {
           await markMessagesAsRead(conversationId)
-          const channel = supabase.channel(`realtime:messages:${conversationId}`)
-          channel.send({
-            type: 'broadcast',
-            event: 'read_receipt',
-            payload: { conversationId, readBy: currentUserId }
-          }).catch(console.error)
+          if (channelRef.current) {
+            channelRef.current.send({
+              type: 'broadcast',
+              event: 'read_receipt',
+              payload: { conversationId, readBy: currentUserId }
+            }).catch(console.error)
+          }
         } catch (e) {
           console.error("Failed to mark server messages as read:", e)
         }
@@ -246,12 +250,13 @@ export function MessageList({ initialMessages, initialNextCursor, currentUserId,
     setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isSaved } : m))
 
     // Broadcast the change to the other user
-    const channel = supabase.channel(`realtime:messages:${conversationId}`)
-    channel.send({
-      type: 'broadcast',
-      event: 'message_saved',
-      payload: { messageId, isSaved }
-    }).catch(console.error)
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'message_saved',
+        payload: { messageId, isSaved }
+      }).catch(console.error)
+    }
 
     try {
       await toggleMessageSaved(messageId, isSaved)

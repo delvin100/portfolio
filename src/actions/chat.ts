@@ -443,10 +443,8 @@ export async function toggleMessageSaved(messageId: string, isSaved: boolean) {
     throw new Error("Unauthorized")
   }
 
-  const message = await prisma.message.update({
+  await prisma.message.update({
     where: { id: messageId },
     data: { isSaved }
   })
-
-  return message
 }

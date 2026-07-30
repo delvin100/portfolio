@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { usePresence } from "@/components/chat/presence-provider"
 import { getInitials } from "@/lib/utils"
+import Link from "next/link"
+import { Edit } from "lucide-react"
 
 interface ChatHeaderProps {
   otherUser: {
@@ -36,7 +38,7 @@ export function ChatHeader({ otherUser }: ChatHeaderProps) {
           </Avatar>
           
           {isOnline ? (
-            <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-background rounded-full z-20 shadow-[0_0_8px_rgba(16,185,129,0.5)] ring-2 ring-emerald-500/20 animate-pulse"></span>
+            <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-background rounded-full z-20 shadow-[0_0_8px_rgba(16,185,129,0.5)] ring-2 ring-emerald-500/20"></span>
           ) : (
             <span className="absolute bottom-0 right-0 w-3 h-3 bg-zinc-500 border-2 border-background rounded-full z-20"></span>
           )}
@@ -52,7 +54,13 @@ export function ChatHeader({ otherUser }: ChatHeaderProps) {
       </div>
       
       <div className="flex items-center gap-1.5 bg-black/10 dark:bg-white/5 p-1 rounded-full border border-black/5 dark:border-white/5 shadow-inner backdrop-blur-md">
-        {/* Actions moved to Sidebar */}
+        <Link 
+          href="/chat/settings" 
+          className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors"
+          title="Edit Settings"
+        >
+          <Edit className="h-4 w-4" strokeWidth={2.5} />
+        </Link>
       </div>
     </div>
   )

@@ -15,9 +15,14 @@ export async function updateUserSettings(prevState: SettingsActionState, formDat
     return { error: "You must be logged in to update settings." }
   }
 
-  const rawUsername = formData.get('username') as string
+  const rawUsername = (formData.get('username') as string) || ''
   const username = rawUsername.trim().toLowerCase()
-  const name = formData.get('name') as string
+  const name = (formData.get('name') as string) || ''
+
+  if (!username || !name) {
+    return { error: "Name and username are required." }
+  }
+
   const currentPassword = formData.get('currentPassword') as string
   const newPassword = formData.get('newPassword') as string
   const confirmPassword = formData.get('confirmPassword') as string
