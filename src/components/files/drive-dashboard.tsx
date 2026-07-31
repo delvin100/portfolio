@@ -2,7 +2,16 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, Search, HardDrive, LogOut, ArrowLeftRight, Upload, Loader2 } from "lucide-react";
+import { ChevronRight, Search, HardDrive, LogOut, ArrowLeftRight, Upload, Loader2, FolderPlus, X, UploadCloud } from "lucide-react";
+
+function formatBytes(bytes: number, decimals = 2) {
+  if (!+bytes) return "0 Bytes";
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+}
 import { DriveItemCard } from "./drive-item-card";
 
 export interface DriveItem {
@@ -32,6 +41,12 @@ export function DriveDashboard({ accountId, onSwitchAccount }: DriveDashboardPro
   const [deletingItem, setDeletingItem] = useState<DriveItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [newName, setNewName] = useState("");
+  const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [quota, setQuota] = useState<{ usage: number, limit: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [previewItem, setPreviewItem] = useState<DriveItem | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Breadcrumbs stack
@@ -61,6 +76,37 @@ export function DriveDashboard({ accountId, onSwitchAccount }: DriveDashboardPro
   }, [accountId, currentFolderId]);
 
   useEffect(() => {
+    const fetchQuota = async () => {
+      try {
+        const url = new URL("/api/drive/quota", window.location.origin);
+        url.searchParams.set("accountId", accountId);
+        const res = await fetch(url.toString());
+        if (res.ok) {
+          const data = await res.json();
+          if (data.quota) {
+            const rawUsage = parseInt(data.quota.usage || "0");
+            const usageInDrive = parseInt(data.quota.usageInDrive || "0");
+            const rawLimit = parseInt(data.quota.limit || "0");
+            
+            // Google Workspace accounts often return the entire organization's pool limit (e.g. 100TB) 
+            // and the entire organization's usage (e.g. 60TB). If the limit is massive, use the drive-specific usage.
+            // Also, if it's a college account (accountId 1), the admin soft-limit might be 10GB but API returns 100TB.
+            const isPooledWorkspace = rawLimit > 50000000000000; // > 50 TB
+            const actualUsage = isPooledWorkspace ? usageInDrive : rawUsage;
+            const actualLimit = (isPooledWorkspace && accountId === "1") ? 10 * 1024 * 1024 * 1024 : rawLimit;
+
+            setQuota({
+              usage: actualUsage,
+              limit: actualLimit
+            });
+          }
+        }
+      } catch (err) {}
+    };
+    fetchQuota();
+  }, [accountId]);
+
+  useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       fetchFiles(searchQuery);
     }, 500);
@@ -78,10 +124,14 @@ export function DriveDashboard({ accountId, onSwitchAccount }: DriveDashboardPro
       setSearchQuery("");
     } else {
       // Download or view file
-      const url = new URL("/api/drive/download", window.location.origin);
-      url.searchParams.set("accountId", accountId);
-      url.searchParams.set("fileId", item.id);
-      window.open(url.toString(), "_blank");
+      if (item.mimeType?.startsWith("image/") || item.mimeType === "application/pdf" || item.mimeType?.startsWith("text/")) {
+        setPreviewItem(item);
+      } else {
+        const url = new URL("/api/drive/download", window.location.origin);
+        url.searchParams.set("accountId", accountId);
+        url.searchParams.set("fileId", item.id);
+        window.open(url.toString(), "_blank");
+      }
     }
   };
 
@@ -90,10 +140,7 @@ export function DriveDashboard({ accountId, onSwitchAccount }: DriveDashboardPro
     setSearchQuery("");
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const uploadFile = async (file: File) => {
     setUploading(true);
     const formData = new FormData();
     formData.append("file", file);
@@ -108,8 +155,6 @@ export function DriveDashboard({ accountId, onSwitchAccount }: DriveDashboardPro
       if (res.ok) {
         const data = await res.json();
         const newFile = { ...data.file, parentId: currentFolderId };
-        
-        // Add the new file to the UI instantly, sorted to the top or bottom
         setItems(prevItems => [newFile, ...prevItems]);
       } else {
         alert("Upload failed.");
@@ -119,6 +164,59 @@ export function DriveDashboard({ accountId, onSwitchAccount }: DriveDashboardPro
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) await uploadFile(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) await uploadFile(file);
+  };
+
+  const handleCreateFolder = async () => {
+    if (!newFolderName.trim()) return;
+
+    setIsCreatingFolder(true);
+    try {
+      const res = await fetch("/api/drive/create-folder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accountId,
+          folderId: currentFolderId,
+          folderName: newFolderName.trim(),
+        }),
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        const newFolder = { ...data.file, parentId: currentFolderId };
+        setItems(prevItems => [newFolder, ...prevItems]);
+      } else {
+        alert("Failed to create folder.");
+      }
+    } catch (err) {
+      alert("Failed to create folder.");
+    } finally {
+      setIsCreatingFolder(false);
+      setShowCreateFolderModal(false);
+      setNewFolderName("");
     }
   };
 
@@ -211,8 +309,8 @@ export function DriveDashboard({ accountId, onSwitchAccount }: DriveDashboardPro
           </span>
         </div>
 
-        <div className="flex-1 max-w-2xl mx-auto">
-          <div className="relative">
+        <div className="flex-1 max-w-2xl mx-auto px-4">
+          <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               type="text"
@@ -224,25 +322,58 @@ export function DriveDashboard({ accountId, onSwitchAccount }: DriveDashboardPro
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onSwitchAccount}
-            className="p-2 text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors cursor-pointer"
-            title="Switch Account"
-          >
-            <ArrowLeftRight size={20} />
-          </button>
-          <button
-            onClick={handleLogout}
-            className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
-            title="Lock Drive"
-          >
-            <LogOut size={20} />
-          </button>
+        <div className="flex items-center gap-4">
+          {quota && quota.limit > 0 && (
+            <div className="hidden md:flex flex-col gap-1 w-32 xl:w-48 text-xs text-gray-500 dark:text-gray-400 mr-2">
+              <div className="flex justify-between">
+                <span>Storage</span>
+                <span>{formatBytes(quota.usage, 1)} / {formatBytes(quota.limit, 0)}</span>
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-1.5">
+                <div className="bg-blue-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (quota.usage / quota.limit) * 100)}%` }} />
+              </div>
+            </div>
+          )}
+          <div className="flex items-center gap-2 border-l border-gray-200 dark:border-white/10 pl-4">
+            <button
+              onClick={onSwitchAccount}
+              className="p-2 text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors cursor-pointer"
+              title="Switch Account"
+            >
+              <ArrowLeftRight size={20} />
+            </button>
+            <button
+              onClick={handleLogout}
+              className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
+              title="Lock Drive"
+            >
+              <LogOut size={20} />
+            </button>
+          </div>
         </div>
       </header>
 
-      <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
+      <main 
+        className="flex-1 p-6 w-full relative"
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {/* Drag Overlay */}
+        <AnimatePresence>
+          {isDragging && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-40 bg-blue-500/10 backdrop-blur-sm border-2 border-dashed border-blue-500 rounded-2xl m-6 flex flex-col items-center justify-center text-blue-600 dark:text-blue-400"
+            >
+              <UploadCloud size={48} className="mb-4" />
+              <h2 className="text-2xl font-bold">Drop files to upload</h2>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           {!searchQuery ? (
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 overflow-x-auto pb-2">
@@ -264,7 +395,14 @@ export function DriveDashboard({ accountId, onSwitchAccount }: DriveDashboardPro
             </div>
           )}
 
-          <div>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setShowCreateFolderModal(true)}
+              className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-xl transition-colors cursor-pointer"
+            >
+              <FolderPlus size={18} />
+              <span className="hidden sm:inline">New Folder</span>
+            </button>
             <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
             <button 
               onClick={() => fileInputRef.current?.click()}
@@ -309,6 +447,52 @@ export function DriveDashboard({ accountId, onSwitchAccount }: DriveDashboardPro
           </div>
         )}
       </main>
+
+      {/* Create Folder Modal */}
+      <AnimatePresence>
+        {showCreateFolderModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/40 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-sm border border-gray-200 dark:border-white/10"
+            >
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Create New Folder</h3>
+              <form onSubmit={(e) => { e.preventDefault(); handleCreateFolder(); }}>
+                <input
+                  type="text"
+                  placeholder="Folder name"
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') setShowCreateFolderModal(false);
+                  }}
+                  className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-transparent dark:border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white mb-6"
+                  autoFocus
+                />
+                <div className="flex justify-end gap-2">
+                  <button 
+                    type="button"
+                    onClick={() => setShowCreateFolderModal(false)}
+                    className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    disabled={isCreatingFolder}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isCreatingFolder ? <Loader2 size={16} className="animate-spin" /> : null}
+                    {isCreatingFolder ? "Creating..." : "Create"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Rename Modal */}
       <AnimatePresence>
@@ -386,6 +570,53 @@ export function DriveDashboard({ accountId, onSwitchAccount }: DriveDashboardPro
                 </button>
               </div>
             </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Preview Modal */}
+      <AnimatePresence>
+        {previewItem && (
+          <div className="fixed inset-0 z-50 flex flex-col bg-black/90 backdrop-blur-md">
+            <div className="flex justify-between items-center p-4 text-white border-b border-white/10">
+              <span className="font-medium">{previewItem.name}</span>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => handleDownload(previewItem)}
+                  className="p-2 hover:bg-white/10 rounded-xl transition-colors cursor-pointer flex items-center gap-2"
+                >
+                  <Upload size={18} />
+                  <span className="text-sm">Download</span>
+                </button>
+                <button 
+                  onClick={() => setPreviewItem(null)}
+                  className="p-2 hover:bg-white/10 rounded-xl transition-colors cursor-pointer ml-2"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 flex items-center justify-center p-4 overflow-hidden relative">
+              {previewItem.mimeType?.startsWith('image/') ? (
+                <img 
+                  src={`/api/drive/download?accountId=${accountId}&fileId=${previewItem.id}`} 
+                  alt={previewItem.name} 
+                  className="max-w-full max-h-full object-contain"
+                />
+              ) : previewItem.mimeType === 'application/pdf' ? (
+                <iframe 
+                  src={`/api/drive/download?accountId=${accountId}&fileId=${previewItem.id}#toolbar=0`} 
+                  className="w-full h-full rounded-xl bg-white"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-white p-4">
+                  <iframe 
+                    src={`/api/drive/download?accountId=${accountId}&fileId=${previewItem.id}`} 
+                    className="w-full h-full rounded-xl bg-white"
+                  />
+                </div>
+              )}
+            </div>
           </div>
         )}
       </AnimatePresence>

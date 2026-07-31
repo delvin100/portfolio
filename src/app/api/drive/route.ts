@@ -35,7 +35,9 @@ export async function GET(request: Request) {
     const drive = google.drive({ version: "v3", auth });
 
     let query = `'${folderId}' in parents and trashed = false`;
-    if (searchQuery) {
+    if (folderId === "shared") {
+      query = `sharedWithMe = true and trashed = false`;
+    } else if (searchQuery) {
       // If searching, ignore folder constraint and search whole drive
       query = `name contains '${searchQuery}' and trashed = false`;
     }
@@ -57,6 +59,19 @@ export async function GET(request: Request) {
       url: f.webViewLink,
       icon: f.iconLink,
     })) || [];
+
+    if (folderId === "root" && !searchQuery) {
+      files.unshift({
+        id: "shared",
+        name: "Shared with me",
+        type: "folder",
+        mimeType: "application/vnd.google-apps.folder",
+        size: undefined,
+        updatedAt: undefined,
+        url: undefined,
+        icon: undefined,
+      });
+    }
 
     return NextResponse.json({ files });
   } catch (error: any) {
