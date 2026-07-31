@@ -29,6 +29,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const accountId = searchParams.get("accountId") || "1";
     const fileId = searchParams.get("fileId");
+    const action = searchParams.get("action");
     
     if (!fileId) {
       return NextResponse.json({ error: "Missing fileId" }, { status: 400 });
@@ -73,9 +74,11 @@ export async function GET(request: Request) {
       },
     });
 
+    const disposition = action === "download" ? "attachment" : "inline";
+
     return new NextResponse(stream, {
       headers: {
-        "Content-Disposition": `inline; filename="${encodeURIComponent(metadata.data.name || "file")}"`,
+        "Content-Disposition": `${disposition}; filename="${encodeURIComponent(metadata.data.name || "file")}"`,
         "Content-Type": metadata.data.mimeType || "application/octet-stream",
       },
     });

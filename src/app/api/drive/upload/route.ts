@@ -67,10 +67,22 @@ export async function POST(request: Request) {
     const res = await drive.files.create({
       requestBody: fileMetadata,
       media: media,
-      fields: "id, name",
+      fields: "id, name, mimeType, size, modifiedTime, webViewLink, iconLink",
     });
 
-    return NextResponse.json({ success: true, file: res.data });
+    const f = res.data;
+    const newFile = {
+      id: f.id,
+      name: f.name,
+      type: f.mimeType === "application/vnd.google-apps.folder" ? "folder" : "file",
+      mimeType: f.mimeType,
+      size: f.size ? formatBytes(parseInt(f.size)) : undefined,
+      updatedAt: f.modifiedTime,
+      url: f.webViewLink,
+      icon: f.iconLink,
+    };
+
+    return NextResponse.json({ success: true, file: newFile });
   } catch (error: any) {
     console.error("Upload Error:", error);
     return NextResponse.json(
@@ -78,4 +90,13 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+}
+
+function formatBytes(bytes: number, decimals = 2) {
+  if (!+bytes) return "0 Bytes";
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }

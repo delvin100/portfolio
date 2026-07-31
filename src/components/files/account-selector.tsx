@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Cloud, Briefcase } from "lucide-react";
+import { Cloud, GraduationCap } from "lucide-react";
 
 interface AccountSelectorProps {
   onSelect: (accountId: string) => void;
@@ -10,7 +10,7 @@ interface AccountSelectorProps {
 export function AccountSelector({ onSelect }: AccountSelectorProps) {
   const accounts = [
     {
-      id: "1",
+      id: "2",
       name: "Personal Drive",
       icon: Cloud,
       color: "bg-blue-500",
@@ -18,12 +18,12 @@ export function AccountSelector({ onSelect }: AccountSelectorProps) {
       description: "Access your personal files",
     },
     {
-      id: "2",
-      name: "Work Drive",
-      icon: Briefcase,
+      id: "1",
+      name: "College Drive",
+      icon: GraduationCap,
       color: "bg-purple-500",
       textColor: "text-purple-500",
-      description: "Access your work files",
+      description: "Access your college files",
     },
   ];
 
@@ -57,9 +57,8 @@ export function AccountSelector({ onSelect }: AccountSelectorProps) {
             whileHover={{ y: -5, scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => onSelect(acc.id)}
-            className="flex flex-col items-center p-8 rounded-3xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:shadow-2xl transition-all group overflow-hidden relative"
+            className="flex flex-col items-center p-8 rounded-3xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:shadow-2xl transition-all group overflow-hidden relative cursor-pointer"
           >
-            <div className={`absolute top-0 left-0 w-full h-1 ${acc.color} opacity-0 group-hover:opacity-100 transition-opacity`} />
             
             <div className={`w-20 h-20 mb-6 rounded-2xl ${acc.color}/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
               <acc.icon className={acc.textColor} size={40} />

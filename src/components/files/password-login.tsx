@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Lock, ArrowRight, Loader2 } from "lucide-react";
+import { Lock, ArrowRight, Loader2, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export function PasswordLogin({ onSuccess }: { onSuccess: () => void }) {
   const [password, setPassword] = useState("");
@@ -37,7 +38,15 @@ export function PasswordLogin({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 relative">
+      <Link 
+        href="/"
+        className="absolute top-8 left-8 flex items-center gap-3 px-6 py-2.5 text-xs font-mono tracking-[0.2em] uppercase text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white border border-gray-300 dark:border-white/20 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors z-10"
+      >
+        <ArrowLeft size={16} />
+        Back To Portfolio
+      </Link>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
