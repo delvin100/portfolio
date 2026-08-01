@@ -2,7 +2,7 @@ import { MessageList } from "@/components/chat/message-list"
 import { MessageInput } from "@/components/chat/message-input"
 import { ChatHeader } from "@/components/chat/chat-header"
 import { getConversationDetails, getMessages, startConversation } from "@/actions/chat"
-import { createClient } from "@/lib/supabase/server"
+import { getAuthUser } from "@/lib/supabase/server"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 
@@ -10,8 +10,7 @@ const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'delvin'
 
 export default async function AdminChatWindow(props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await getAuthUser()
 
   if (!user) {
     redirect('/login')
@@ -52,6 +51,7 @@ export default async function AdminChatWindow(props: { params: Promise<{ usernam
           profileImage: otherUser!.profileImage,
           status: otherUser!.status,
         }} 
+        isAdmin={true}
       />
 
       {/* Message List */}

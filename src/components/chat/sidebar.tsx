@@ -130,7 +130,7 @@ export function ChatSidebar({ initialConversations, currentUser, isAdmin = false
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-8 w-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors"
+                className="h-8 w-8 rounded-full hover:bg-transparent text-muted-foreground hover:text-foreground transition-colors"
                 title="Edit Profile"
               />
             }>
@@ -184,7 +184,7 @@ export function ChatSidebar({ initialConversations, currentUser, isAdmin = false
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-8 w-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground hover:text-red-500 transition-colors"
+                className="h-8 w-8 rounded-full hover:bg-transparent text-muted-foreground hover:text-red-500 transition-colors"
                 onClick={() => startTransition(() => { logout() })}
                 title="Logout"
               >

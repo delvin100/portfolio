@@ -5,15 +5,14 @@ import { Button } from "@/components/ui/button"
 import { ChatHeader } from "@/components/chat/chat-header"
 import { logout } from "@/actions/auth"
 import { getConversationDetails, getMessages, startConversation } from "@/actions/chat"
-import { createClient } from "@/lib/supabase/server"
+import { getAuthUser } from "@/lib/supabase/server"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { use } from "react"
 
 export default async function ChatWindow(props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await getAuthUser()
 
   if (!user) {
     redirect('/chat-login')

@@ -15,9 +15,10 @@ interface ChatHeaderProps {
     profileImage: string | null
     status: string | null
   }
+  isAdmin?: boolean
 }
 
-export function ChatHeader({ otherUser }: ChatHeaderProps) {
+export function ChatHeader({ otherUser, isAdmin = false }: ChatHeaderProps) {
   const { onlineUsers } = usePresence()
   const isOnline = onlineUsers.includes(otherUser.id)
 
@@ -53,15 +54,17 @@ export function ChatHeader({ otherUser }: ChatHeaderProps) {
         </div>
       </div>
       
-      <div className="flex items-center gap-1.5 bg-black/10 dark:bg-white/5 p-1 rounded-full border border-black/5 dark:border-white/5 shadow-inner backdrop-blur-md">
-        <Link 
-          href="/chat/settings" 
-          className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors"
-          title="Edit Settings"
-        >
-          <Edit className="h-4 w-4" strokeWidth={2.5} />
-        </Link>
-      </div>
+      {!isAdmin && (
+        <div className="flex items-center gap-1.5 bg-black/10 dark:bg-white/5 p-1 rounded-full border border-black/5 dark:border-white/5 shadow-inner backdrop-blur-md">
+          <Link 
+            href="/chat/settings" 
+            className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors"
+            title="Edit Settings"
+          >
+            <Edit className="h-4 w-4" strokeWidth={2.5} />
+          </Link>
+        </div>
+      )}
     </div>
   )
 }

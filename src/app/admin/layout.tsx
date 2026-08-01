@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Briefcase, Code, FileText, Award, LogOut, Settings, Users, MessageSquare } from 'lucide-react'
+import { LayoutDashboard, Briefcase, Code, FileText, Award, LogOut, Settings, Users, MessageSquare, Loader2 } from 'lucide-react'
+import { useFormStatus } from 'react-dom'
 import { logout } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 
@@ -17,6 +18,40 @@ const navItems = [
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
+function MobileLogoutButton() {
+  const { pending } = useFormStatus()
+  return (
+    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" type="submit" disabled={pending}>
+      {pending ? <Loader2 className="h-5 w-5 animate-spin" /> : <LogOut className="h-5 w-5" />}
+    </Button>
+  )
+}
+
+function DesktopLogoutButton() {
+  const { pending } = useFormStatus()
+  return (
+    <button 
+      type="submit" 
+      disabled={pending}
+      className="flex items-center w-full gap-3 p-2 rounded-xl hover:bg-destructive/10 transition-colors group relative overflow-hidden border border-transparent hover:border-destructive/20 disabled:opacity-50"
+    >
+      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-muted group-hover:bg-destructive/20 transition-all z-10 shadow-sm group-hover:shadow-destructive/20">
+        {pending ? (
+          <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
+        ) : (
+          <LogOut className="w-4 h-4 text-muted-foreground group-hover:text-destructive transition-all group-hover:translate-x-0.5" />
+        )}
+      </div>
+      
+      <div className="flex flex-col items-start z-10">
+        <span className="text-sm font-semibold text-foreground group-hover:text-destructive transition-colors">
+          {pending ? "Signing Out..." : "Sign Out"}
+        </span>
+      </div>
+    </button>
+  )
+}
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
@@ -29,9 +64,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           Portfolio Admin
         </Link>
         <form action={logout}>
-          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" type="submit">
-            <LogOut className="h-5 w-5" />
-          </Button>
+          <MobileLogoutButton />
         </form>
       </header>
 
@@ -65,18 +98,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
         <div className="p-4 mt-auto">
           <form action={logout}>
-            <button 
-              type="submit" 
-              className="flex items-center w-full gap-3 p-2 rounded-xl hover:bg-destructive/10 transition-colors group relative overflow-hidden border border-transparent hover:border-destructive/20"
-            >
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-muted group-hover:bg-destructive/20 transition-all z-10 shadow-sm group-hover:shadow-destructive/20">
-                <LogOut className="w-4 h-4 text-muted-foreground group-hover:text-destructive transition-all group-hover:translate-x-0.5" />
-              </div>
-              
-              <div className="flex flex-col items-start z-10">
-                <span className="text-sm font-semibold text-foreground group-hover:text-destructive transition-colors">Sign Out</span>
-              </div>
-            </button>
+            <DesktopLogoutButton />
           </form>
         </div>
       </aside>

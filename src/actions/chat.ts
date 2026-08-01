@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getAuthUser } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 
@@ -69,8 +69,7 @@ export async function searchUsers(query: string) {
     return []
   }
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await getAuthUser()
 
   if (!user) {
     throw new Error("Unauthorized")
@@ -124,8 +123,7 @@ export async function searchUsers(query: string) {
 }
 
 export async function startConversation(targetUserId: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await getAuthUser()
 
   if (!user) {
     throw new Error("Unauthorized")
@@ -163,25 +161,15 @@ export async function startConversation(targetUserId: string) {
   }
 
   // 1. Check if a direct conversation already exists between these two users
-  const existingConversations = await prisma.conversation.findMany({
+  const directConversation = await prisma.conversation.findFirst({
     where: {
       isGroup: false,
-      members: {
-        some: {
-          userId: user.id
-        }
-      }
+      AND: [
+        { members: { some: { userId: user.id } } },
+        { members: { some: { userId: targetUserId } } }
+      ]
     },
-    include: {
-      members: true
-    }
   })
-
-  // Filter to make sure we get exactly the conversation with just these two members
-  const directConversation = existingConversations.find(conv => 
-    conv.members.length === 2 && 
-    conv.members.some(m => m.userId === targetUserId)
-  )
 
   if (directConversation) {
     return directConversation.id
@@ -204,8 +192,7 @@ export async function startConversation(targetUserId: string) {
 }
 
 export async function getConversationDetails(conversationId: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await getAuthUser()
 
   if (!user) {
     throw new Error("Unauthorized")
@@ -250,15 +237,14 @@ export async function getConversationDetails(conversationId: string) {
 }
 
 export async function getMessages(conversationId: string, cursor?: string, limit: number = 50) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await getAuthUser()
 
   if (!user) {
     throw new Error("Unauthorized")
   }
 
-  // Run lazy deletion
-  await cleanupOldMessages()
+  // Run lazy deletion without blocking
+  cleanupOldMessages().catch(console.error)
 
   const messages = await prisma.message.findMany({
     where: { conversationId },
@@ -295,8 +281,7 @@ export async function sendMessage(
   attachments?: { url: string; fileType: string; name: string }[],
   messageId?: string
 ) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await getAuthUser()
 
   if (!user) {
     throw new Error("Unauthorized")
@@ -325,13 +310,12 @@ export async function sendMessage(
 }
 
 export async function getUserConversations() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await getAuthUser()
 
   if (!user) return []
 
-  // Run lazy deletion
-  await cleanupOldMessages()
+  // Run lazy deletion without blocking
+  cleanupOldMessages().catch(console.error)
 
   let dbUser = await prisma.user.findUnique({
     where: { id: user.id },
@@ -416,8 +400,7 @@ export async function getUserConversations() {
 }
 
 export async function markMessagesAsRead(conversationId: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await getAuthUser()
 
   if (!user) {
     throw new Error("Unauthorized")
@@ -436,8 +419,7 @@ export async function markMessagesAsRead(conversationId: string) {
 }
 
 export async function toggleMessageSaved(messageId: string, isSaved: boolean) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await getAuthUser()
 
   if (!user) {
     throw new Error("Unauthorized")
