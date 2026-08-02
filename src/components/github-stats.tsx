@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { GitHubCalendar } from "react-github-calendar"
 import { useTheme } from "next-themes"
-import { GitFork, Users, BookOpen, ExternalLink, FileCode, Calendar, Star, Activity } from "lucide-react"
+import { GitFork, Users, BookOpen, ExternalLink, FileCode, Calendar, Star, Activity, ArrowLeft, ArrowRight } from "lucide-react"
 
 interface GithubStatsProps {
   username: string
@@ -35,35 +35,15 @@ export function GithubStats({ username }: GithubStatsProps) {
     // Fetch GitHub User Data
     const fetchGithubData = async () => {
       try {
-        const res = await fetch(`https://api.github.com/users/${username}`)
+        const res = await fetch(`/api/github?username=${username}`)
         if (!res.ok) return
         const data = await res.json()
-        if (!data.message) {
-          
-          try {
-            const eventsRes = await fetch(`https://api.github.com/users/${username}/events?per_page=100`)
-            if (eventsRes.ok) {
-              const eventsData = await eventsRes.json()
-              const thirtyDaysAgo = new Date()
-              thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-              
-              const recentActivity = eventsData.reduce((acc: number, event: any) => {
-                if (new Date(event.created_at) >= thirtyDaysAgo) {
-                  return acc + 1
-                }
-                return acc
-              }, 0)
-              data.recent_commits = recentActivity
-            }
-          } catch (e) {
-            data.recent_commits = 0
-          }
-
+        if (!data.error) {
           setUserData(data)
         }
       } catch (err) {
         // Use console.warn instead of console.error to avoid Next.js dev overlay
-        console.warn("Failed to fetch github data (possibly blocked by browser/adblocker)")
+        console.warn("Failed to fetch github data (possibly blocked by browser/adblocker)", err)
       }
     }
     
@@ -167,9 +147,13 @@ export function GithubStats({ username }: GithubStatsProps) {
         {/* Subtle glow behind calendar */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
         
-        <div className="overflow-x-auto w-full flex justify-center pb-2 min-h-[150px] relative z-10">
+        {/* Natively start scroll on the right side using dir="rtl" */}
+        <div 
+          className="overflow-x-auto w-full flex justify-start lg:justify-center pb-2 min-h-[150px] relative z-10"
+          dir="rtl"
+        >
           {mounted && (
-            <div className="relative z-10 scale-95 sm:scale-100 origin-center transition-transform">
+            <div dir="ltr" className="relative z-10 scale-95 sm:scale-100 origin-center transition-transform shrink-0 px-2 lg:px-0">
               <GitHubCalendar 
                 username={username}
                 colorScheme={currentTheme === "light" ? "light" : "dark"}
@@ -185,6 +169,15 @@ export function GithubStats({ username }: GithubStatsProps) {
             </div>
           )}
         </div>
+
+        {/* Mobile scroll hint */}
+        {mounted && (
+          <div className="w-full flex items-center justify-center mt-3 lg:hidden text-slate-400 text-xs opacity-70 gap-2">
+            <ArrowLeft size={14} className="animate-pulse text-blue-500" />
+            <span>Swipe to see more</span>
+            <ArrowRight size={14} className="animate-pulse text-blue-500" />
+          </div>
+        )}
       </motion.div>
     </motion.div>
   )

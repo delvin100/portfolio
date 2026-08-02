@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 const navLinks = [
   { name: "About", href: "#about" },
@@ -18,6 +19,24 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const router = useRouter()
+  const clickCount = useRef(0)
+  const clickTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleNameClick = () => {
+    clickCount.current += 1
+    
+    if (clickCount.current >= 3) {
+      router.push('/files')
+      clickCount.current = 0
+    }
+
+    if (clickTimeout.current) clearTimeout(clickTimeout.current)
+    
+    clickTimeout.current = setTimeout(() => {
+      clickCount.current = 0
+    }, 1000) // 1 second window for 3 clicks
+  }
 
   useEffect(() => {
     setMounted(true)
@@ -37,7 +56,10 @@ export function Navbar() {
       }`}
     >
       <div className="container mx-auto px-6 md:px-12 flex items-center justify-between">
-        <div className="relative flex items-center gap-3 text-[1.35rem] font-medium tracking-wide group cursor-default">
+        <div 
+          className="relative flex items-center gap-3 text-[1.35rem] font-medium tracking-wide group cursor-pointer"
+          onClick={handleNameClick}
+        >
           {/* Luffy running animation */}
           <div className="absolute -top-20 left-6 w-32 h-32 pointer-events-none z-10 transition-transform duration-300 group-hover:-translate-y-2">
             <img 
@@ -46,7 +68,7 @@ export function Navbar() {
               className="w-full h-full object-contain scale-[1.8] drop-shadow-lg"
             />
           </div>
-          <span className="text-slate-300 ml-8">Delvin Varghese</span>
+          <span className="text-slate-300 ml-8 select-none">Delvin Varghese</span>
         </div>
 
         {/* Desktop Nav */}

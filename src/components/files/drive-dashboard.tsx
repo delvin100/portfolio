@@ -327,7 +327,7 @@ export function DriveDashboard({ accountId, onSwitchAccount }: DriveDashboardPro
             <div className="hidden md:flex flex-col gap-1 w-32 xl:w-48 text-xs text-gray-500 dark:text-gray-400 mr-2">
               <div className="flex justify-between">
                 <span>Storage</span>
-                <span>{formatBytes(quota.usage, 1)} / {formatBytes(quota.limit, 0)}</span>
+                <span>{formatBytes(quota.usage, 2)} / {formatBytes(quota.limit, 0)}</span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-1.5">
                 <div className="bg-blue-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (quota.usage / quota.limit) * 100)}%` }} />
