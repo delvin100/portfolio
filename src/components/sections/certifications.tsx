@@ -26,8 +26,7 @@ export function CertificationsSection({ certifications }: { certifications?: Cer
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [thumbWidth, setThumbWidth] = useState(50);
+  const [currentIndex, setCurrentIndex] = useState(1);
   const displayCerts = certifications || [];
 
   const checkScroll = () => {
@@ -36,9 +35,12 @@ export function CertificationsSection({ certifications }: { certifications?: Cer
       setCanScrollLeft(scrollLeft > 0);
       setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth);
       
-      const maxScroll = scrollWidth - clientWidth;
-      setScrollProgress(maxScroll > 0 ? scrollLeft / maxScroll : 0);
-      setThumbWidth(Math.min(100, (clientWidth / scrollWidth) * 100));
+      if (displayCerts.length > 0) {
+        const avgItemWidth = scrollWidth / displayCerts.length;
+        let newIndex = Math.round((scrollLeft + clientWidth) / avgItemWidth);
+        newIndex = Math.max(1, Math.min(newIndex, displayCerts.length));
+        setCurrentIndex(newIndex);
+      }
     }
   };
 
@@ -190,12 +192,12 @@ export function CertificationsSection({ certifications }: { certifications?: Cer
                 </button>
                 
                 <div className="text-sm font-bold tracking-[0.2em] text-white flex items-center">
-                  <span className="text-primary w-5 text-center">
-                    0{Math.round(scrollProgress * (displayCerts.length - 1)) + 1}
+                  <span className="text-primary min-w-[20px] text-center">
+                    {String(currentIndex).padStart(displayCerts.length.toString().length, '0')}
                   </span>
                   <span className="text-slate-500 mx-3 font-normal opacity-50">/</span>
-                  <span className="text-slate-400 w-5 text-center">
-                    0{displayCerts.length}
+                  <span className="text-slate-400 min-w-[20px] text-center">
+                    {String(displayCerts.length).padStart(displayCerts.length.toString().length, '0')}
                   </span>
                 </div>
                 

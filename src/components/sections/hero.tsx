@@ -238,14 +238,12 @@ export function HeroSection() {
                     {'  '}skills: [<span className="text-yellow-300">'React'</span>, <span className="text-yellow-300">'Node.js'</span>, <span className="text-yellow-300">'MySQL'</span>],
                     <br/>
                     {'  '}passion: <span className="text-yellow-300">'Building scalable systems'</span>,
+                    <br/><br/>
+                    {'  '}code: () <span className="text-pink-400">{'=>'}</span> <span className="text-yellow-300">'Building the future...'</span>
                     <br/>
                     {'}'};
                     <br/><br/>
-                    <span className="text-pink-400">export default</span> <span className="text-cyan-300">function</span> <span className="text-green-300">buildFuture</span>() {'{'}
-                    <br/>
-                    {'  '}<span className="text-pink-400">return</span> developer.<span className="text-blue-300">code</span>();
-                    <br/>
-                    {'}'}
+                    <span className="text-pink-400">export default</span> developer.<span className="text-blue-300">code</span>();
                   </div>
                 </div>
               </div>
